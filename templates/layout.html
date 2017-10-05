@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>人臉影像分析系統</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="{{ url_for('static', filename='assets/js/ie/html5shiv.js')}}"></script><![endif]-->
+		<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css')}}" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="{{ url_for('static', filename='assets/css/ie8.css')}}" /><![endif]-->
+		<!--[if lte IE 9]><link rel="stylesheet" href="{{ url_for('static', filename='assets/css/ie9.css')}}" /><![endif]-->
+        
+	</head>
+	<body>
+		<div id="page-wrapper">
+
+			<!-- Header -->
+				<div id="header">
+
+					<!-- Logo -->
+						<h1><a href="/" id="logo">影像分析系統 <em>by IECS</em></a></h1>
+
+			{% block body %}{% endblock %}
+
+
+            <!-- Copyright -->
+			<div id="footer">
+                <div class="copyright">
+					<ul class="menu">
+						<li>&copy; IECS Project. All rights reserved</li>
+					</ul>
+				</div>
+            </div>
+
+		</div>
+
+		<!-- Scripts -->
+			<script src="{{ url_for('static', filename='assets/js/jquery.min.js')}}"></script>
+			<script src="{{ url_for('static', filename='assets/js/jquery.dropotron.min.js')}}"></script>
+			<script src="{{ url_for('static', filename='assets/js/skel.min.js')}}"></script>
+			<script src="{{ url_for('static', filename='assets/js/util.js')}}"></script>
+			<!--[if lte IE 8]><script src="{{ url_for('static', filename='assets/js/ie/respond.min.js')}}"></script><![endif]-->
+			<script src="{{ url_for('static', filename='assets/js/main.js')}}"></script>
+
+	</body>
+</html>

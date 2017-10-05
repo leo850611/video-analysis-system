@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block body %}
+					<!-- Nav -->
+						<nav id="nav">
+							<ul>
+								<li><a href="/">首頁</a></li>
+								<li><a href="/train">訓練</a></li>
+								<li class="current"><a href="/upload">影片上傳</a></li>
+								<li><a href="/analysis">比對結果</a></li>
+								<li><a href="#">其他</a></li>
+							</ul>
+						</nav>
+				</div>
+
+<form action="" enctype=multipart/form-data method="post">
+    <label>選擇影片檔案：(大小限制100MB)</label>
+    <input type="file" name="file" size="0" required="required"><br><br>
+    <label>日期與時間：</label>
+    <input type="date" name="date" id="bookdate" value="2017-10-01" max="2020-01-01" required="required">
+    <input type="time" name="usr_time" value="12:00" required="required">
+    <div>
+        <input type="submit" value="送出">
+    </div>
+</form>
+{% endblock %}
