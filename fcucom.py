@@ -9,8 +9,8 @@ UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = set(['mp4', 'avi', 'mkv', 'wmv', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
+app.config['UPLOAD_FOLDER'] = 'uploads' #自行建立資料夾
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
 #"{{ url_for('static', filename='')}}"
 
 @app.route('/' , methods = ['GET', 'POST'])
@@ -28,7 +28,7 @@ def train():
             picbase64 = picbase64[22:].encode()
             with open("imageToSave.png", "wb") as fh:
                 fh.write(base64.decodebytes(picbase64))
-            ##todo
+            ##TODO 依不同name建立資料夾及以亂數存圖片
             
             flash('上傳成功!')
             return redirect(url_for('train'))
