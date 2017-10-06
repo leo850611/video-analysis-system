@@ -9,7 +9,7 @@ UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = set(['mp4', 'avi', 'mkv', 'wmv', 'jpg', 'jpeg'])
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads' #自行建立資料夾
+app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
 #"{{ url_for('static', filename='')}}"
 
@@ -43,13 +43,13 @@ def train():
 @app.route('/upload', methods = ['GET', 'POST'])
 def upload():
     if request.method == 'POST':
-        file = request.files['file']
+        file = request.files['file'] 
+        vodname = request.form['vod_date'] +' '+ request.form['vod_time'].replace(':', '')
         file.filename = file.filename.lower()
-
         if file and allowed_file(file.filename): 
-            filename = secure_filename(file.filename) 
+            filename = secure_filename(file.filename)
+            filename = vodname + os.path.splitext(filename)[1]
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)) 
-            #return redirect( url_for( 'uploads', filename = filename )) 
             return alertmsg('上傳成功!')
         else:
             return alertmsg('檔案格式不符')
@@ -62,14 +62,18 @@ def analysis():
     return render_template('analysis.html')
 
     
+@app.route('/result' , methods = ['GET'])
+def result():
+    return render_template('result.html')
+    
+
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
-
 def allowed_file(filename): 
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
 
 def alertmsg(msg):
     return '''
@@ -82,5 +86,7 @@ def alertmsg(msg):
 if __name__ == '__main__':
     app.debug = True
     app.secret_key = '6Le7Lx0UAA996OzccZzh6IKgBN9B4d5XCuK1uQXwJ' 
+    if not os.path.exists('uploads'):
+        os.mkdir('uploads')
     app.run(host = '0.0.0.0')
     
