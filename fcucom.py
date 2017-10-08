@@ -3,6 +3,8 @@ import os
 from flask import Flask,url_for,request,render_template,redirect,escape,flash
 from werkzeug import secure_filename
 import base64
+import string
+import random
 import sqlite3
 
 UPLOAD_FOLDER = '/uploads'
@@ -24,12 +26,12 @@ def train():
         name = request.form['name']
         if name != '':
             print('Get a name: '+ name)
+            peoplefile = 'training-images/'+ name
+            newfile(peoplefile) #依人名產生資料夾
             picbase64 = request.form['pic']
             picbase64 = picbase64[22:].encode()
-            with open("imageToSave.png", "wb") as fh:
+            with open(peoplefile+'/'+id_generator()+".png", "wb") as fh:
                 fh.write(base64.decodebytes(picbase64))
-            ##TODO 依不同name建立資料夾及以亂數存圖片
-            
             flash('上傳成功!')
             return redirect(url_for('train'))
         else:
@@ -82,11 +84,18 @@ def alertmsg(msg):
         window.history.go(-1);
     </script>'''
 
+def newfile(filename):
+    if not os.path.exists(filename):
+        os.mkdir(filename)
+
+def id_generator(chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(6))
 
 if __name__ == '__main__':
     app.debug = True
     app.secret_key = '6Le7Lx0UAA996OzccZzh6IKgBN9B4d5XCuK1uQXwJ' 
-    if not os.path.exists('uploads'):
-        os.mkdir('uploads')
+    newfile('uploads')
+    newfile('training-images')
+
     app.run(host = '0.0.0.0')
     
