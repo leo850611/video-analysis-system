@@ -5,37 +5,41 @@ from werkzeug import secure_filename
 import base64
 import string
 import random
-import sqlite3
 
 UPLOAD_FOLDER = '/uploads'
-ALLOWED_EXTENSIONS = set(['mp4', 'avi', 'mkv', 'wmv', 'jpg', 'jpeg'])
+ALLOWED_EXTENSIONS = set(['mp4', 'avi', 'mkv', 'wmv', 'jpg'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
-#"{{ url_for('static', filename='')}}"
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
+
 
 @app.route('/' , methods = ['GET', 'POST'])
 def index():
     return render_template('index.html')
 
-    
+
 @app.route('/train' , methods = ['GET', 'POST'])
 def train():
     if request.method == 'POST':
         name = request.form['name']
+        picbase64 = request.form['pic']
+        
         if name != '':
-            print('Get a name: '+ name)
-            peoplefile = 'training-images/'+ name
-            newfile(peoplefile) #依人名產生資料夾
-            picbase64 = request.form['pic']
-            picbase64 = picbase64[22:].encode()
-            with open(peoplefile+'/'+id_generator()+".png", "wb") as fh:
-                fh.write(base64.decodebytes(picbase64))
-            flash('上傳成功!')
-            return redirect(url_for('train'))
+            if picbase64[:209] != 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAAA10dzkAAAYlklEQVR4Xu3WQQEAAAgCMelf2iA3GzB8sHMECBAgQIAAAQIpgaXSCkuAAAECBAgQIHAGoCcgQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB':
+                print('Get a name: '+ name)
+                picbase64 = picbase64[22:].encode()
+                peoplefile = 'training-images/'+ name
+                newfile(peoplefile) #依人名產生資料夾
+                
+                with open(peoplefile+'/'+id_generator()+".png", "wb") as fh:
+                    fh.write(base64.decodebytes(picbase64))
+                flash('上傳成功!')
+                return redirect(url_for('train'))
+            else:
+                flash('Error: 沒有照相機')
+                return redirect(url_for('train'))
         else:
-            print('NoName')
             flash('請輸入名字')
             return redirect(url_for('train'))
     else:
@@ -68,11 +72,10 @@ def analysis():
         
         return alertmsg('請等待比對結果!')
     else:
-        #產生影片檔選單
+        #產生影片檔及姓名選單
         videolist = os.listdir(app.config['UPLOAD_FOLDER'])
         for i in videolist:
             flash(i, 'videos')
-        #產生姓名選單
         namelist = os.listdir('training-images')
         for i in namelist:
             flash(i, 'names')
@@ -84,6 +87,13 @@ def result():
     return render_template('result.html')
 
 
+@app.route('/admin' , methods = ['GET'])
+def admin():
+    #TODO顯示所有人名及照片張數及所有影片 附刪除功能
+    return render_template('admin.html')
+    
+    
+    
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
@@ -107,6 +117,8 @@ def id_generator(chars=string.ascii_lowercase + string.digits):
 
 def uploadsfile():
     return
+    
+    
 if __name__ == '__main__':
     app.debug = True
     app.secret_key = '6Le7Lx0UAA996OzccZzh6IKgBN9B4d5XCuK1uQXwJ' 

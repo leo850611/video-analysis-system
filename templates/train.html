@@ -13,16 +13,20 @@
 						</nav>
 				</div>
 
-<label>輸入名字：</label>
+<label>輸入名字：(限英文及數字)</label>
 <input type="text" name="name" id="name" maxlength="10" style="width:200px" style="ime-mode:disabled" onKeyUp="value=value.replace(/[\W]/g,'')" required="required"><br>
-<!--TODO javascript Replaced element -->
+<script>
+    function getCook(cookiename){
+        var cookiestring=RegExp(""+cookiename+"[^;]+").exec(document.cookie);
+        return unescape(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
+    }
+    document.getElementById("name").value = getCook('username');
+</script>
 
-<label>拍照上傳：(Using Opera or Chrome)</label>
-
+<label>拍照上傳：(Using Chrome or Opera, and WebCam)</label>
 <div id="promoNode"></div>
-	
 	<video id="video" width="640" height="480" autoplay></video>
-	<button id="snap" class="sexyButton">擷取照片</button>
+	<input id="snap" class="sexyButton" type="submit" value="擷取照片">
 	<canvas id="canvas" width="640" height="480"></canvas>
 	<script type ="application/javascript">
 		// Put event listeners into place
@@ -43,7 +47,6 @@
                     video.play();
                 });
             }
-
             /* Legacy code below! */
             else if(navigator.getUserMedia) { // Standard
 				navigator.getUserMedia(mediaConfig, function(stream) {
@@ -66,7 +69,6 @@
 			document.getElementById('snap').addEventListener('click', function() {
 				context.drawImage(video, 0, 0, 640, 480);
                 //console.log(canvas.toDataURL());
-                //Content-Disposition: form-data; name="pic"
                 document.cookie = "username=" + document.getElementById("name").value;
                 
                 var data = new FormData();
@@ -74,9 +76,6 @@
                 data.append('pic', canvas.toDataURL());
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', "train", true);
-                xhr.onload = function () {
-                //    console.log(this.responseText);
-                };
                 xhr.send(data);
                 window.location.reload();
 			});
