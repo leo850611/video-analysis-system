@@ -59,15 +59,29 @@ def upload():
         return render_template('upload.html')
     
     
-@app.route('/analysis' , methods = ['GET'])
+@app.route('/analysis' , methods = ['GET', 'POST'])
 def analysis():
-    return render_template('analysis.html')
+    if request.method == 'POST':
+        videoname = request.form['videoname']
+        peoplename = request.form['peoplename']
+        #TODO用影片名稱及人名下指令,並產生結果檔案
+        
+        return alertmsg('請等待比對結果!')
+    else:
+        #產生影片檔選單
+        videolist = os.listdir(app.config['UPLOAD_FOLDER'])
+        for i in videolist:
+            flash(i, 'videos')
+        #產生姓名選單
+        namelist = os.listdir('training-images')
+        for i in namelist:
+            flash(i, 'names')
+        return render_template('analysis.html')
 
-    
+
 @app.route('/result' , methods = ['GET'])
 def result():
     return render_template('result.html')
-    
 
 
 @app.errorhandler(404)
@@ -88,9 +102,11 @@ def newfile(filename):
     if not os.path.exists(filename):
         os.mkdir(filename)
 
-def id_generator(chars=string.ascii_uppercase + string.digits):
+def id_generator(chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(6))
 
+def uploadsfile():
+    return
 if __name__ == '__main__':
     app.debug = True
     app.secret_key = '6Le7Lx0UAA996OzccZzh6IKgBN9B4d5XCuK1uQXwJ' 

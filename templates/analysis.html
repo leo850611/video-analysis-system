@@ -13,4 +13,39 @@
 						</nav>
 				</div>
 
+    <form action="" method="post">   
+        <label>選擇影片：</label>
+        <select size=1 name="videoname" required="required"> 
+            <option value="" selected="selected">選擇一個影片檔</option>
+            {% with videos = get_flashed_messages(category_filter=["videos"]) %}
+            {% if videos %}
+            {% for message in videos %}
+            <option value="{{ message }}">{{ message }}
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </select>
+        
+        <label>選擇名字：</label>
+        <select size=1 name="peoplename" required="required"> 
+            <option value="" selected="selected">選擇要辨識的名字</option>
+            {% with names = get_flashed_messages(category_filter=["names"]) %}
+            {% if names %}
+            {% for message in names %}
+            <option value="{{ message }}">{{ message }}
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            
+        </select>
+            
+            
+            
+<!--             {% for message in get_flashed_messages() %}
+            <option value="{{ message }}">{{ message }}
+            {% endfor %} -->
+        
+        
+        <p><input type="submit" value="開始分析"><br/>
+    </form>
 {% endblock %}
