@@ -5,6 +5,7 @@ from werkzeug import secure_filename
 import base64
 import string
 import random
+import shutil
 
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = set(['mp4', 'avi', 'mkv', 'wmv', 'jpg'])
@@ -50,7 +51,7 @@ def train():
 def upload():
     if request.method == 'POST':
         file = request.files['file'] 
-        vodname = request.form['vod_date'] +' '+ request.form['vod_time'].replace(':', '')
+        vodname = request.form['vod_date'] +'_'+ request.form['vod_time'].replace(':', '')
         file.filename = file.filename.lower()
         if file and allowed_file(file.filename): 
             filename = secure_filename(file.filename)
@@ -87,10 +88,34 @@ def result():
     return render_template('result.html')
 
 
-@app.route('/admin' , methods = ['GET'])
+@app.route('/admin' , methods = ['GET', 'POST'])
 def admin():
-    #TODO顯示所有人名及照片張數及所有影片 附刪除功能
-    return render_template('admin.html')
+    if request.method == 'POST':
+        videolist = request.form.getlist('delvideo')
+        namelist = request.form.getlist('delname')
+        try:
+            for i in videolist:
+                filename = secure_filename(i)
+                os.remove(app.config['UPLOAD_FOLDER']+'/'+ filename)
+                print('del video: ' + filename)
+            for i in namelist:
+                filename = secure_filename(i)
+                shutil.rmtree('training-images/'+ filename)
+                print('del name: ' + filename)
+            return alertmsg('刪除成功!')
+        except:
+            return alertmsg('刪除失敗')
+    else:
+        #產生影片及姓名選取方塊
+        videolist = os.listdir(app.config['UPLOAD_FOLDER'])
+        for i in videolist:
+            flash(i, 'videos')
+        namelist = os.listdir('training-images')
+        for i in namelist:
+            flash(i, 'names')
+            piclist = os.listdir('training-images/'+ i)
+            flash(i + ' ( '+ str(len(piclist)) +'張照片)', 'people')         
+        return render_template('admin.html')
     
     
     
@@ -115,9 +140,7 @@ def newfile(filename):
 def id_generator(chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(6))
 
-def uploadsfile():
-    return
-    
+
     
 if __name__ == '__main__':
     app.debug = True

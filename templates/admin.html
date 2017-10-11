@@ -13,5 +13,36 @@
 						</nav>
 				</div>
 
+    <label>檔案列表</label>
+    <ul>
+        {% with people = get_flashed_messages(category_filter=["people"]) %}
+        {% if people %}
+        {% for message in people %}
+        <li>{{ message }}</li>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </ul>
+
+    <form action="" method="post">   
+        <label>選擇要刪除的影片：</label>
+            {% with videos = get_flashed_messages(category_filter=["videos"]) %}
+            {% if videos %}
+            {% for message in videos %}
+            <input type="checkbox" value="{{ message }}" name="delvideo"> {{ message }}<br>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        <br>
+        <label>選擇要刪除的名字：</label>
+            {% with names = get_flashed_messages(category_filter=["names"]) %}
+            {% if names %}
+            {% for message in names %}
+            <input type="checkbox" value="{{ message }}" name="delname"> {{ message }}<br>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        <p><input type="submit" value="刪除檔案"><br/>
+    </form>
 
 {% endblock %}
