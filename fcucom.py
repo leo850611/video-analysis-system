@@ -2,10 +2,9 @@
 import os
 from flask import Flask,url_for,request,render_template,redirect,escape,flash
 from werkzeug import secure_filename
-import base64
-import string
-import random
-import shutil
+import base64, string, random
+import shutil, subprocess
+
 
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = set(['mp4', 'avi', 'mkv', 'wmv', 'jpg'])
@@ -69,9 +68,10 @@ def analysis():
     if request.method == 'POST':
         videoname = request.form['videoname']
         peoplename = request.form['peoplename']
-        #TODO用影片名稱及人名下指令,並產生結果檔案
-        
         return alertmsg('請等待比對結果!')
+        #TODO用影片名稱及人名下指令,並產生結果檔案
+        #subprocess.call(['python', 'xx.py'])
+        
     else:
         #產生影片檔及姓名選單
         videolist = os.listdir(app.config['UPLOAD_FOLDER'])
@@ -122,6 +122,10 @@ def admin():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def bad_request(e):
+    return render_template('500.html'), 500
 
 def allowed_file(filename): 
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
