@@ -14,7 +14,6 @@
 				</div>
 
     <label>檔案列表</label>
-    <ul>
         {% with people = get_flashed_messages(category_filter=["people"]) %}
         {% if people %}
         {% for message in people %}
@@ -22,7 +21,7 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-    </ul>
+    <br>
 
     <form action="" method="post">   
         <label>選擇要刪除的影片：</label>

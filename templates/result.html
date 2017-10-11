@@ -13,4 +13,32 @@
 						</nav>
 				</div>
 
+    <label>影片名稱：</label>
+    {% with video = get_flashed_messages(category_filter=["video"]) %}
+    {% if video %}
+    {% for message in video %}
+    <p>{{ message }}</p>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    
+    <label>出現時間：</label>
+    <ul>
+        {% with who = get_flashed_messages(category_filter=["who"]) %}
+        {% if who %}
+        {% for message in who %}
+        <li>{{ message }}</li>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </ul>
+    
+    {% with err = get_flashed_messages(category_filter=["err"]) %}
+    {% if err %}
+    {% for message in err %}
+    <div class=flash align="center" style="color:red;">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    
 {% endblock %}

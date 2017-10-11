@@ -3,7 +3,7 @@ import os
 from flask import Flask,url_for,request,render_template,redirect,escape,flash
 from werkzeug import secure_filename
 import base64, string, random
-import shutil, subprocess
+import shutil, subprocess, multiprocessing
 
 
 UPLOAD_FOLDER = '/uploads'
@@ -68,10 +68,15 @@ def analysis():
     if request.method == 'POST':
         videoname = request.form['videoname']
         peoplename = request.form['peoplename']
+        videoname = secure_filename(videoname)
+        peoplename = secure_filename(peoplename)
+        #建立進程池
+        multiprocessing.freeze_support() #避免RuntimeError(win)
+        pool = multiprocessing.Pool()
+        pool.apply_async(videotask, args=(videoname,peoplename,))
+        pool.close()
+        pool.join()
         return alertmsg('請等待比對結果!')
-        #TODO用影片名稱及人名下指令,並產生結果檔案
-        #subprocess.call(['python', 'xx.py'])
-        
     else:
         #產生影片檔及姓名選單
         videolist = os.listdir(app.config['UPLOAD_FOLDER'])
@@ -85,6 +90,23 @@ def analysis():
 
 @app.route('/result' , methods = ['GET'])
 def result():
+    if os.path.isfile('result.txt'):
+        file = open('result.txt')
+        line = file.readline()
+        while line:
+            minute = 0
+            sec = line.split("'")
+            peoplename = sec[1]
+            sec = int(sec[2][1:])
+            while sec >= 60:
+                sec = sec-60
+                minute = minute+1
+            if peoplename != 'unknown':
+                flash(peoplename +' - '+ str(minute) +'分'+ str(sec)+'秒', 'who')
+            line = file.readline()
+        file.close()
+    else:
+        flash('尚未產生結果', 'err')
     return render_template('result.html')
 
 
@@ -144,8 +166,17 @@ def newfile(filename):
 def id_generator(chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(6))
 
-
-    
+def videotask(videoname, peoplename):
+    print('START!')
+    subprocess.call('./util/align-dlib.py ./training-images/ align outerEyesAndNose ./aligned-images/ --size 96', shell=True)
+    print('1--')
+    subprocess.call('./batch-represent/main.lua -outDir ./generated-embeddings/ -data ./aligned-images/')
+    subprocess.call('./demos/classifier.py train ./generated-embeddings/')
+    print('9--')
+    subprocess.call(['python', 'video.py', 'generated-embeddings/classifier.pkl', videoname])
+    return 0
+   
+   
 if __name__ == '__main__':
     app.debug = True
     app.secret_key = '6Le7Lx0UAA996OzccZzh6IKgBN9B4d5XCuK1uQXwJ' 
