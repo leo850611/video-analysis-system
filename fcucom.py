@@ -7,7 +7,7 @@ import shutil, subprocess, multiprocessing
 
 
 UPLOAD_FOLDER = '/uploads'
-ALLOWED_EXTENSIONS = set(['mp4', 'avi', 'mkv', 'wmv', 'jpg'])
+ALLOWED_EXTENSIONS = set(['mp4', 'avi', 'mkv', 'wmv'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -58,7 +58,7 @@ def upload():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)) 
             return alertmsg('上傳成功!')
         else:
-            return alertmsg('檔案格式不符')
+            return alertmsg('Error: 檔案格式不符')
     else:
         return render_template('upload.html')
     
@@ -71,12 +71,16 @@ def analysis():
         videoname = secure_filename(videoname)
         peoplename = secure_filename(peoplename)
         #建立進程池
-        multiprocessing.freeze_support() #避免RuntimeError(win)
-        pool = multiprocessing.Pool()
-        pool.apply_async(videotask, args=(videoname,peoplename,))
-        pool.close()
-        pool.join()
-        return alertmsg('請等待比對結果!')
+        if os.path.isfile('ing') != True:
+            open('ing', 'w').close()
+            multiprocessing.freeze_support() #避免RuntimeError(win)
+            pool = multiprocessing.Pool()
+            pool.apply_async(videotask, args=(videoname,peoplename,))
+            #pool.close()
+            #pool.join()
+            return alertmsg('請等待比對結果!')
+        else:
+            return alertmsg('Error: 前次的辨識尚未完成')
     else:
         #產生影片檔及姓名選單
         videolist = os.listdir(app.config['UPLOAD_FOLDER'])
@@ -90,23 +94,25 @@ def analysis():
 
 @app.route('/result' , methods = ['GET'])
 def result():
-    if os.path.isfile('result.txt'):
+    if os.path.isfile('ing'):
+        flash('正在進行辨識......', 'err')
+    elif os.path.isfile('result.txt'):
         file = open('result.txt')
         line = file.readline()
         while line:
-            minute = 0
+            min = 0
             sec = line.split("'")
-            peoplename = sec[1]
+            peoplename = sec[1]           
             sec = int(sec[2][1:])
             while sec >= 60:
-                sec = sec-60
-                minute = minute+1
+                sec = sec - 60
+                min = min + 1
             if peoplename != 'unknown':
-                flash(peoplename +' - '+ str(minute) +'分'+ str(sec)+'秒', 'who')
+                flash(peoplename +' - '+ str(min) +'分'+ str(sec) +'秒', 'who')
             line = file.readline()
         file.close()
     else:
-        flash('尚未產生結果', 'err')
+        flash('沒有任何結果', 'err')
     return render_template('result.html')
 
 
@@ -126,7 +132,7 @@ def admin():
                 print('del name: ' + filename)
             return alertmsg('刪除成功!')
         except:
-            return alertmsg('刪除失敗')
+            return alertmsg('Error: 刪除失敗')
     else:
         #產生影片及姓名選取方塊
         videolist = os.listdir(app.config['UPLOAD_FOLDER'])
@@ -166,14 +172,16 @@ def newfile(filename):
 def id_generator(chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(6))
 
+def removefile(filename):
+    try:
+        os.remove(filename)
+    except:
+        pass
+    
 def videotask(videoname, peoplename):
-    print('START!')
-    subprocess.call('./util/align-dlib.py ./training-images/ align outerEyesAndNose ./aligned-images/ --size 96', shell=True)
-    print('1--')
-    subprocess.call('./batch-represent/main.lua -outDir ./generated-embeddings/ -data ./aligned-images/')
-    subprocess.call('./demos/classifier.py train ./generated-embeddings/')
-    print('9--')
-    subprocess.call(['python', 'video.py', 'generated-embeddings/classifier.pkl', videoname])
+    subprocess.call(['sh', 'start.sh'])
+    subprocess.call(['python', 'video.py', 'generated-embeddings/classifier.pkl','uploads/' + videoname])
+    removefile('ing')
     return 0
    
    
@@ -182,6 +190,7 @@ if __name__ == '__main__':
     app.secret_key = '6Le7Lx0UAA996OzccZzh6IKgBN9B4d5XCuK1uQXwJ' 
     newfile('uploads')
     newfile('training-images')
-
+    removefile('ing')
+    
     app.run(host = '0.0.0.0')
     
