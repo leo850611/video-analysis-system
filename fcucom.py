@@ -178,10 +178,35 @@ def removefile(filename):
     except:
         pass
     
+def facechange():
+    if os.path.exists('facelist.txt'):
+        f = open('facelist.txt', 'r')
+        facelisttxt = f.read()
+        f.close()
+        facelist = ''
+        for i in os.walk('training-images'):
+            facelist = facelist + str(i)
+        #比較是否更動
+        if facelisttxt == facelist:
+            return False
+        else:
+            return True
+    else:
+        #不存在則建立
+        f = open('facelist.txt', 'w')
+        for i in os.walk('training-images'):
+            f.write(str(i))
+        f.close()
+        return True
+
 def videotask(videoname, peoplename):
-    subprocess.call(['sh', 'start.sh'])
-    subprocess.call(['python', 'video.py', 'generated-embeddings/classifier.pkl','uploads/' + videoname])
-    removefile('ing')
+    try:
+        subprocess.call(['sh', 'start.sh'])
+        subprocess.call(['python', 'video.py', 'generated-embeddings/classifier.pkl','uploads/' + videoname])
+    except:
+        pass
+    finally:    
+        removefile('ing')
     return 0
    
    
