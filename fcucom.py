@@ -201,6 +201,7 @@ def facechange():
 
 def videotask(videoname, peoplename):
     try:
+        subprocess.call(['rm', 'result.txt'])
         if facechange():
             subprocess.call(['sh', 'start.sh'])
         subprocess.call(['python', 'video.py', 'generated-embeddings/classifier.pkl','uploads/' + videoname])

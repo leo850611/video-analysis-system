@@ -1,5 +1,4 @@
 #!/bin/bash
-rm result.txt
 rm -r generated-embeddings
 rm -r aligned-images
 ./util/align-dlib.py ./training-images/ align outerEyesAndNose ./aligned-images/ --size 96
