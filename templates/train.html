@@ -12,18 +12,29 @@
 							</ul>
 						</nav>
 				</div>
+<form action="" enctype=multipart/form-data method="post">
+    <label>輸入名字：(限英文及數字)</label>
+    <input type="text" name="name" id="name" maxlength="10" style="width:200px" style="ime-mode:disabled" onKeyUp="value=value.replace(/[\W]/g,'')" required="required"><br>
+    <script>
+        function getCook(cookiename){
+            var cookiestring=RegExp(""+cookiename+"[^;]+").exec(document.cookie);
+            return unescape(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
+        }
+        document.getElementById("name").value = getCook('username');
+    </script>
 
-<label>輸入名字：(限英文及數字)</label>
-<input type="text" name="name" id="name" maxlength="10" style="width:200px" style="ime-mode:disabled" onKeyUp="value=value.replace(/[\W]/g,'')" required="required"><br>
-<script>
-    function getCook(cookiename){
-        var cookiestring=RegExp(""+cookiename+"[^;]+").exec(document.cookie);
-        return unescape(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
-    }
-    document.getElementById("name").value = getCook('username');
-</script>
+    <label>1 照片上傳：(選擇圖片檔案)</label>
+    <input type="file" name="file" size="0" required="required" multiple/><br><br>
+    <p><input type="submit" value="送出">
+</form>
 
-<label>拍照上傳：(Using Chrome or Opera, and WebCam)</label>
+
+{% for message in get_flashed_messages() %}
+<label align="center" style="color:red;">{{ message }}</label>
+{% endfor %}
+
+
+<label>2 拍照上傳：(Using Chrome or Opera, and WebCam)</label>
 <div id="promoNode"></div>
 	<video id="video" width="640" height="480" autoplay></video>
 	<input id="snap" type="submit" value="擷取照片">
@@ -68,7 +79,6 @@
 			// Trigger photo take
 			document.getElementById('snap').addEventListener('click', function() {
 				context.drawImage(video, 0, 0, 640, 480);
-                //console.log(canvas.toDataURL());
                 document.cookie = "username=" + document.getElementById("name").value;
                 
                 var data = new FormData();
@@ -77,15 +87,15 @@
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', "train", true);
                 xhr.send(data);
+                
+                xhr.onload = function () {
+                    alert(this.responseText);
+                };
                 window.location.reload();
 			});
 		}, false);
 	</script>
 </div>
-
-{% for message in get_flashed_messages() %}
-<label align="center" style="color:red;">{{ message }}</label>
-{% endfor %}
 
 
 {% endblock %}

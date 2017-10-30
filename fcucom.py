@@ -4,7 +4,7 @@ from flask import Flask,url_for,request,render_template,redirect,escape,flash
 from werkzeug import secure_filename
 import base64, string, random
 import shutil, subprocess, multiprocessing
-
+import hashlib
 
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS = set(['mp4', 'avi', 'mkv', 'wmv'])
@@ -23,25 +23,35 @@ def index():
 def train():
     if request.method == 'POST':
         name = request.form['name']
-        picbase64 = request.form['pic']
-        
         if name != '':
-            if picbase64[:209] != 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAAA10dzkAAAYlklEQVR4Xu3WQQEAAAgCMelf2iA3GzB8sHMECBAgQIAAAQIpgaXSCkuAAAECBAgQIHAGoCcgQIAAAQIECMQEDMBY4eISIECAAAECBAxAP0CAAAECBAgQiAkYgLHCxSVAgAABAgQIGIB':
-                print('Get a name: '+ name)
-                picbase64 = picbase64[22:].encode()
+            #拍照上傳模式
+            if len(request.files.getlist('file')) == 0:
+                picbase64 = request.form['pic']
+                if hashlib.md5(picbase64.encode(encoding='UTF-8') ).hexdigest() != '75acd48bad3bbd6f4f5f9b90a4e91cf4':
+                    print('Get a name: '+ name)
+                    picbase64 = picbase64[22:].encode()
+                    peoplefile = 'training-images/'+ name
+                    newfile(peoplefile) #依人名產生資料夾
+                    
+                    with open(peoplefile+'/'+id_generator()+".png", "wb") as fh:
+                        fh.write(base64.decodebytes(picbase64))
+                    return ('上傳成功!')
+                else:
+                    return ('Error: 沒有照相機')
+            #照片上傳模式
+            else:
+                print('Get name file: '+ name)
                 peoplefile = 'training-images/'+ name
                 newfile(peoplefile) #依人名產生資料夾
-                
-                with open(peoplefile+'/'+id_generator()+".png", "wb") as fh:
-                    fh.write(base64.decodebytes(picbase64))
-                flash('上傳成功!')
-                return redirect(url_for('train'))
-            else:
-                flash('Error: 沒有照相機')
-                return redirect(url_for('train'))
+                try:
+                    filelist = request.files.getlist("file")
+                    for file in filelist:
+                        file.save(os.path.join(peoplefile, id_generator()+'.jpg') )
+                    return alertmsg('上傳成功!')
+                except:
+                    return alertmsg('Error: 上傳失敗')
         else:
-            flash('請輸入名字')
-            return redirect(url_for('train'))
+            return ('Error: 請輸入名字')
     else:
         return render_template('train.html')
     
@@ -55,7 +65,7 @@ def upload():
         if file and allowed_file(file.filename): 
             filename = secure_filename(file.filename)
             filename = vodname + os.path.splitext(filename)[1]
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)) 
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return alertmsg('上傳成功!')
         else:
             return alertmsg('Error: 檔案格式不符')
@@ -103,7 +113,7 @@ def result():
             min = 0
             sec = line.split("'")
             peoplename = sec[1]           
-            sec = int(sec[2][1:])
+            sec = int(sec[-1][1:])
             while sec >= 60:
                 sec = sec - 60
                 min = min + 1
@@ -190,6 +200,10 @@ def facechange():
         if facelisttxt == facelist:
             return False
         else:
+            f = open('facelist.txt', 'w')
+            for i in os.walk('training-images'):
+                f.write(str(i))
+            f.close()
             return True
     else:
         #不存在則建立
