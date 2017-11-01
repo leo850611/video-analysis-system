@@ -4,6 +4,13 @@
 						<nav id="nav">
 							<ul>
 								<li><a href="/">首頁</a></li>
+                                <li>
+									<a href="#">訓練</a>
+									<ul>
+										<li><a href="/train-pic">照片上傳</a></li>
+										<li><a href="/train-cam">拍照上傳</a></li>
+									</ul>
+								</li>
 								<li><a href="/train">訓練</a></li>
 								<li><a href="/upload">影片上傳</a></li>
 								<li><a href="/analysis">影像分析</a></li>
@@ -12,6 +19,10 @@
 							</ul>
 						</nav>
 				</div>
+<section class="wrapper style1">
+<div class="container">
+<div id="content">
+
 
     <label>影片名稱：</label>
     {% with video = get_flashed_messages(category_filter=["video"]) %}
@@ -33,6 +44,18 @@
         {% endwith %}
     </ul>
     
+    {% with msg = get_flashed_messages(category_filter=["msg"]) %}
+    {% if msg %}
+    <div id="content" align='center'>
+    <img src={{ url_for('static', filename='images/loading.gif') }}/>
+    <div>
+    {% for message in msg %}
+    <div class=flash align="center" style="color:blue;">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    
     {% with err = get_flashed_messages(category_filter=["err"]) %}
     {% if err %}
     {% for message in err %}
@@ -41,4 +64,9 @@
     {% endif %}
     {% endwith %}
     
+    
+    
+</div>
+</div> 
+</section>    
 {% endblock %}

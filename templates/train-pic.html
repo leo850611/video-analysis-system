@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block body %}
+					<!-- Nav -->
+						<nav id="nav">
+							<ul>
+								<li><a href="/">首頁</a></li>
+								<li class="current">
+									<a href="#">訓練</a>
+									<ul>
+										<li><a href="/train-pic">照片上傳</a></li>
+										<li><a href="/train-cam">拍照上傳</a></li>
+									</ul>
+								</li>
+                                <li><a href="/upload">影片上傳</a></li>
+								<li><a href="/analysis">影像分析</a></li>
+								<li><a href="/result">比對結果</a></li>
+								<li><a href="/admin">檔案管理</a></li>
+							</ul>
+						</nav>
+				</div>
+<section class="wrapper style1">
+<div class="container">
+<div id="content">
+
+
+<form action="" enctype=multipart/form-data method="post">
+    <label>輸入名字：(限英文及數字)</label>
+    <input type="text" name="name" id="name" maxlength="10" style="width:200px" style="ime-mode:disabled" onKeyUp="value=value.replace(/[\W]/g,'')" required="required"><br>
+    <script>
+        function getCook(cookiename){
+            var cookiestring=RegExp(""+cookiename+"[^;]+").exec(document.cookie);
+            return unescape(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
+        }
+        document.getElementById("name").value = getCook('username');
+    </script>
+
+    <label>照片上傳：(選擇圖片檔案)</label>
+    <input type="file" name="file" size="0" required="required" multiple/><br><br>
+    <p><input type="submit" value="送出">
+</form>
+
+
+</div>
+</div> 
+</section>
+{% endblock %}

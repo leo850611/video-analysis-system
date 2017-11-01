@@ -7,7 +7,8 @@ import shutil, subprocess, multiprocessing
 import hashlib
 
 UPLOAD_FOLDER = '/uploads'
-ALLOWED_EXTENSIONS = set(['mp4', 'avi', 'mkv', 'wmv'])
+ALLOWED_EXTENSIONS_VID = set(['mp4', 'avi', 'mkv', 'wmv'])
+ALLOWED_EXTENSIONS_PIC = set(['jpg', 'jpge', 'png'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -19,50 +20,62 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/train' , methods = ['GET', 'POST'])
-def train():
+@app.route('/train-pic' , methods = ['GET', 'POST'])
+def trainPic():
+    if request.method == 'POST':
+        name = request.form['name']
+        if name != '':
+            #照片上傳模式
+            print('Get name file: '+ name)
+            peoplefile = 'training-images/'+ name
+            newfile(peoplefile)
+            try:
+                filelist = request.files.getlist("file")
+                for file in filelist:
+                    if file and allowed_file(file.filename.lower() , 'picture'): 
+                        file.save(os.path.join(peoplefile, id_generator()+'.jpg') )
+                    else:
+                        return alertmsg('Error: 檔案格式不符')
+                return alertmsg('上傳成功!')
+            except:
+                return alertmsg('Error: 上傳失敗')
+        else:
+            return ('Error: 請輸入名字')
+    else:
+        return render_template('train-pic.html')
+
+   
+@app.route('/train-cam' , methods = ['GET', 'POST'])
+def trainCam():
     if request.method == 'POST':
         name = request.form['name']
         if name != '':
             #拍照上傳模式
-            if len(request.files.getlist('file')) == 0:
-                picbase64 = request.form['pic']
-                if hashlib.md5(picbase64.encode(encoding='UTF-8') ).hexdigest() != '75acd48bad3bbd6f4f5f9b90a4e91cf4':
-                    print('Get a name: '+ name)
-                    picbase64 = picbase64[22:].encode()
-                    peoplefile = 'training-images/'+ name
-                    newfile(peoplefile) #依人名產生資料夾
-                    
-                    with open(peoplefile+'/'+id_generator()+".png", "wb") as fh:
-                        fh.write(base64.decodebytes(picbase64))
-                    return ('上傳成功!')
-                else:
-                    return ('Error: 沒有照相機')
-            #照片上傳模式
-            else:
-                print('Get name file: '+ name)
+            picbase64 = request.form['pic']
+            if hashlib.md5(picbase64.encode(encoding='UTF-8') ).hexdigest() != '75acd48bad3bbd6f4f5f9b90a4e91cf4':
+                print('Get a name: '+ name)
+                picbase64 = picbase64[22:].encode()
                 peoplefile = 'training-images/'+ name
-                newfile(peoplefile) #依人名產生資料夾
-                try:
-                    filelist = request.files.getlist("file")
-                    for file in filelist:
-                        file.save(os.path.join(peoplefile, id_generator()+'.jpg') )
-                    return alertmsg('上傳成功!')
-                except:
-                    return alertmsg('Error: 上傳失敗')
+                newfile(peoplefile)
+                    
+                with open(peoplefile+'/'+id_generator()+".png", "wb") as fh:
+                    fh.write(base64.decodebytes(picbase64))
+                return ('上傳成功!')
+            else:
+                return ('Error: 沒有照相機')
         else:
             return ('Error: 請輸入名字')
     else:
-        return render_template('train.html')
-    
-    
+        return render_template('train-cam.html')
+
+        
 @app.route('/upload', methods = ['GET', 'POST'])
 def upload():
     if request.method == 'POST':
         file = request.files['file'] 
         vodname = request.form['vod_date'] +'_'+ request.form['vod_time'].replace(':', '')
         file.filename = file.filename.lower()
-        if file and allowed_file(file.filename): 
+        if file and allowed_file(file.filename , 'video'): 
             filename = secure_filename(file.filename)
             filename = vodname + os.path.splitext(filename)[1]
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -105,7 +118,7 @@ def analysis():
 @app.route('/result' , methods = ['GET'])
 def result():
     if os.path.isfile('ing'):
-        flash('正在進行辨識......', 'err')
+        flash('正在進行辨識', 'msg')
     elif os.path.isfile('result.txt'):
         file = open('result.txt')
         line = file.readline()
@@ -165,8 +178,11 @@ def page_not_found(e):
 def bad_request(e):
     return render_template('500.html'), 500
 
-def allowed_file(filename): 
-    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+def allowed_file(filename , filetype): 
+    if filetype == 'picture':
+        return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS_PIC
+    else:
+        return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS_VID
 
 def alertmsg(msg):
     return '''

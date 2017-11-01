@@ -4,7 +4,13 @@
 						<nav id="nav">
 							<ul>
 								<li><a href="/">首頁</a></li>
-								<li><a href="/train">訓練</a></li>
+								<li>
+									<a href="#">訓練</a>
+									<ul>
+										<li><a href="/train-pic">照片上傳</a></li>
+										<li><a href="/train-cam">拍照上傳</a></li>
+									</ul>
+								</li>
 								<li><a href="/upload">影片上傳</a></li>
 								<li class="current"><a href="/analysis">影像分析</a></li>
 								<li><a href="/result">比對結果</a></li>
@@ -12,9 +18,13 @@
 							</ul>
 						</nav>
 				</div>
+<section class="wrapper style1">
+<div class="container">
+<div id="content">
+
 
     <form action="" method="post">   
-        <label>選擇影片：</label>
+        <label>選擇要分析的影片：</label>
         <select size=1 name="videoname" required="required"> 
             <option value="" selected="selected">選擇一個影片檔</option>
             {% with videos = get_flashed_messages(category_filter=["videos"]) %}
@@ -26,9 +36,9 @@
             {% endwith %}
         </select>
         <br><br>
-        <label>選擇名字：</label>
+        <label>選擇要辨識的人：</label>
         <select size=1 name="peoplename" required="required"> 
-            <option value="" selected="selected">選擇要辨識的人</option>
+            <option value="" selected="selected">-</option>
             {% with names = get_flashed_messages(category_filter=["names"]) %}
             {% if names %}
             {% for message in names %}
@@ -40,4 +50,9 @@
         
         <p><input type="submit" value="開始分析"><br/>
     </form>
+    
+    
+</div>
+</div> 
+</section>
 {% endblock %}
