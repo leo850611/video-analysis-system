@@ -28,11 +28,15 @@
         {% if people %}
         {% for message in people %}
         <li>{{ message }}</li>
+        <img width="294" height="221" src='static/{{ message.split(''' (''')[0] }}.png') }}/>
         {% endfor %}
         {% endif %}
-        {% endwith %}
+        {% endwith %}	
+        <br>
+	
+    
     <br>
-
+    
     <form action="" method="post">   
         <label>選擇要刪除的影片：</label>
             {% with videos = get_flashed_messages(category_filter=["videos"]) %}

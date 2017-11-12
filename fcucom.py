@@ -157,11 +157,19 @@ def admin():
         except:
             return alertmsg('Error: 刪除失敗')
     else:
+        namelist = os.listdir('training-images')
+        #縮圖建立
+        for i in namelist:
+            name = i.strip()
+            try:
+                files= os.listdir('training-images/'+ name )
+                shutil.copy2('training-images/'+ name +'/'+files[0], 'static/'+ name +'.png')
+            except:
+                return render_template('500.html'), 500
         #產生影片及姓名選取方塊
         videolist = os.listdir(app.config['UPLOAD_FOLDER'])
         for i in videolist:
             flash(i, 'videos')
-        namelist = os.listdir('training-images')
         for i in namelist:
             flash(i, 'names')
             piclist = os.listdir('training-images/'+ i)
