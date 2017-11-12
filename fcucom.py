@@ -5,6 +5,7 @@ from werkzeug import secure_filename
 import base64, string, random
 import shutil, subprocess, multiprocessing
 import hashlib
+import time
 
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS_VID = set(['mp4', 'avi', 'mkv', 'wmv'])
@@ -120,20 +121,8 @@ def result():
     if os.path.isfile('ing'):
         flash('正在進行辨識', 'msg')
     elif os.path.isfile('result.txt'):
-        file = open('result.txt')
-        line = file.readline()
-        while line:
-            min = 0
-            sec = line.split("'")
-            peoplename = sec[1]           
-            sec = int(sec[-1][1:])
-            while sec >= 60:
-                sec = sec - 60
-                min = min + 1
-            if peoplename != 'unknown':
-                flash(peoplename +' - '+ str(min) +'分'+ str(sec) +'秒', 'who')
-            line = file.readline()
-        file.close()
+        timetable()
+        flash(time.time(), 'timejs')
     else:
         flash('沒有任何結果', 'err')
     return render_template('result.html')
@@ -249,6 +238,82 @@ def videotask(videoname, peoplename):
         removefile('ing')
     return 0
    
+def timetable():
+    f = open('static/assets/time.js', 'w', encoding = 'utf-8')
+    f.write('''var chart = AmCharts.makeChart( "chartdiv", {
+    "type": "gantt",
+    "theme": "light",
+    "marginRight": 70,
+    "period": "ss",
+    "dataDateFormat":"YYYY-MM-DD",
+    "balloonDateFormat": "JJ:NN:SS",
+    "columnWidth": 0.5,
+    "valueAxis": {
+        "type": "date"
+    },
+    "brightnessStep": 10,
+    "graph": {
+        "fillAlphas": 1,
+        "balloonText": "<b>[[task]]</b>: [[open]] [[value]]"
+    },
+    "rotate": true,
+    "categoryField": "category",
+    "segmentsField": "segments",
+    "colorField": "color",
+    "startDate": "''')
+    f.write('2017-10-01')
+    f.write('''",
+    "startField": "start",
+    "endField": "end",
+    "durationField": "duration",
+    "dataProvider": [ ''')
+    #圖表內容
+    namelist = os.listdir('training-images')
+    for name in namelist:
+        f.write('''{
+        "category": "'''+ name +'''",
+        "segments": [ ''')
+        
+        if os.path.isfile('result.txt'):
+            file = open('result.txt')
+            line = file.readline()
+            while line:
+                min = 0
+                sec = line.split("'")
+                peoplename = sec[1]           
+                if(name == peoplename):
+                    sec = sec[-1][1:]
+                    f.write('''{
+                        "start": '''+ sec +''',
+                        "duration": 1,
+                        "color": "#33CCFF"
+                    },''')
+                
+                line = file.readline()
+            file.close()
+        f.write(''']
+        },''')
+    
+    f.write(''' ],
+        "valueScrollbar": {
+            "autoGridCount":true
+        },
+        "chartCursor": {
+            "cursorColor":"#55bb76",
+            "valueBalloonsEnabled": false,
+            "cursorAlpha": 0,
+            "valueLineAlpha":0.5,
+            "valueLineBalloonEnabled": true,
+            "valueLineEnabled": true,
+            "zoomable":false,
+            "valueZoomable":true
+        },
+        "export": {
+            "enabled": true
+         }
+    } );''')
+    f.close()
+
    
 if __name__ == '__main__':
     app.debug = True
@@ -256,6 +321,5 @@ if __name__ == '__main__':
     newfile('uploads')
     newfile('training-images')
     removefile('ing')
-    
     app.run(host = '0.0.0.0')
     

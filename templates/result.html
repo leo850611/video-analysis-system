@@ -22,6 +22,12 @@
 <div class="container">
 <div id="content">
 
+<style>
+#chartdiv {
+  width: 100%;
+  height: 500px;
+}																	
+</style>
 
     <label>影片名稱：</label>
     {% with video = get_flashed_messages(category_filter=["video"]) %}
@@ -33,15 +39,6 @@
     {% endwith %}
     
     <label>出現時間：</label>
-    <ul>
-        {% with who = get_flashed_messages(category_filter=["who"]) %}
-        {% if who %}
-        {% for message in who %}
-        <li>{{ message }}</li>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-    </ul>
     
     {% with msg = get_flashed_messages(category_filter=["msg"]) %}
     {% if msg %}
@@ -63,8 +60,29 @@
     {% endif %}
     {% endwith %}
     
-    
-    
+    <!-- 
+    <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+    <script src="https://www.amcharts.com/lib/3/serial.js"></script>
+    <script src="https://www.amcharts.com/lib/3/gantt.js"></script>
+    <script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
+    <script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
+    <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
+    -->
+    <script src="{{ url_for('static', filename='assets/amcharts/amcharts.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/amcharts/serial.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/amcharts/gantt.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/amcharts/light.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/amcharts/export.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/amcharts/export.css') }}" type="text/css" media="all" />
+    {% with timejs = get_flashed_messages(category_filter=["timejs"]) %}
+    {% if timejs %}
+    {% for message in timejs %}
+    <script src='static/assets/time.js?{{ message }}'></script>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <div id="chartdiv"></div>
+
 </div>
 </div> 
 </section>    
