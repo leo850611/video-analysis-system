@@ -27,8 +27,8 @@
         {% with people = get_flashed_messages(category_filter=["people"]) %}
         {% if people %}
         {% for message in people %}
-        <li>{{ message }}</li>
-        <img width="294" height="221" src='static/{{ message.split(''' (''')[0] }}.png') }}/>
+        <li><a target="_blank" href="admin/{{ message.split(''' (''')[0] }}">{{ message }}</a></li>
+        <img width="294" height="221" src='static/{{ message.split(''' (''')[0] }}.png'/>
         {% endfor %}
         {% endif %}
         {% endwith %}	

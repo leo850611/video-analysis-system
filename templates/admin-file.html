@@ -1,0 +1,32 @@
+﻿{% extends "layout.html" %}
+{% block body %}
+					<!-- Nav -->
+						<nav id="nav">
+						</nav>
+				</div>
+<section class="wrapper style1">
+<div class="container">
+<div id="content">
+    {% with names = get_flashed_messages(category_filter=["names"]) %}
+    {% if names %}
+    {% for message in names %}
+    <label>{{ message }} 的所有照片</label>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    
+    
+    {% with image = get_flashed_messages(category_filter=["image"]) %}
+    {% if image %}
+    {% for message in image %}
+    <img src="data:image/png;base64,{{ message }}" />
+    <br>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+
+</div>
+</div> 
+</section>
+{% endblock %}

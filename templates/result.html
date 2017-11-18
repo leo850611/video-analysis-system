@@ -82,7 +82,23 @@
     {% endif %}
     {% endwith %}
     <div id="chartdiv"></div>
-
+    
+    <script>
+        setTimeout(function(){
+            var xhr = new XMLHttpRequest();
+                xhr.open('GET', "api/run", true);
+                xhr.send(null);
+                xhr.onload = function () {
+                    var res = this.responseText;
+                    if(res == "running"){
+                        //alert(res);
+                        window.location.reload();
+                    }
+                };
+        }, 5000);
+    </script>
+    
+    
 </div>
 </div> 
 </section>    

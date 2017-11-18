@@ -102,7 +102,8 @@ def analysis():
             pool.apply_async(videotask, args=(videoname,peoplename,))
             #pool.close()
             #pool.join()
-            return alertmsg('請等待比對結果!')
+            return redirect(url_for('result'))
+            #return alertmsg('請等待比對結果!')
         else:
             return alertmsg('Error: 前次的辨識尚未完成')
     else:
@@ -127,6 +128,15 @@ def result():
         flash('沒有任何結果', 'err')
     return render_template('result.html')
 
+@app.route('/result/<username>' , methods = ['GET'])
+def user_result(username):
+    namelist = os.listdir('training-images')
+    if username in namelist:
+        #依人名回傳結果
+        return username
+    else:
+        return render_template('404.html') 
+        
 
 @app.route('/admin' , methods = ['GET', 'POST'])
 def admin():
@@ -165,7 +175,31 @@ def admin():
             flash(i + ' ( '+ str(len(piclist)) +'張照片)', 'people')         
         return render_template('admin.html')
     
-    
+
+
+@app.route('/admin/<username>' , methods = ['GET'])
+def admin_file(username):
+    namelist = os.listdir('training-images')
+    #依人名回傳結果
+    if username in namelist:
+        flash(username, 'names')
+        piclist = os.listdir('training-images/'+ username)
+        for pic in piclist:
+            f = open('training-images/'+ username + '/' + pic,'rb')
+            picbase64 = base64.b64encode(f.read())
+            f.close()
+            picbase64 = (str(picbase64))[2:-1]
+            flash(picbase64, 'image')
+        return render_template('admin-file.html') 
+    else:
+        return render_template('404.html') 
+
+@app.route('/api/run', methods = ['GET'])
+def runcheck():
+    if os.path.isfile('ing'):
+        return ('running')
+    else:
+        return ('not running')
     
 @app.errorhandler(404)
 def page_not_found(e):
@@ -296,7 +330,7 @@ def timetable():
     
     f.write(''' ],
         "valueScrollbar": {
-            "autoGridCount":true
+            "autoGridCount":false
         },
         "chartCursor": {
             "cursorColor":"#55bb76",
