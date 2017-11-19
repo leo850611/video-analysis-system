@@ -38,19 +38,17 @@
     {% endif %}
     {% endwith %}
     
-    <label>出現時間：</label>
-    
-    {% with msg = get_flashed_messages(category_filter=["msg"]) %}
-    {% if msg %}
-    <div id="content" align='center'>
-    <img src={{ url_for('static', filename='images/loading.gif') }}/>
-    <div>
-    {% for message in msg %}
-    <div class=flash align="center" style="color:blue;">{{ message }}</div>
+    <label>個人詳細分析：</label>
+    {% with names = get_flashed_messages(category_filter=["names"]) %}
+    {% if names %}
+    {% for message in names %}
+    <li style="margin-left:30px"><a href="result/{{ message }}">{{ message }}</a></li>
     {% endfor %}
     {% endif %}
     {% endwith %}
-
+    
+    <label>出現時間：</label>
+    
     
     {% with err = get_flashed_messages(category_filter=["err"]) %}
     {% if err %}
@@ -78,25 +76,11 @@
     {% if timejs %}
     {% for message in timejs %}
     <script src='static/assets/time.js?{{ message }}'></script>
+    <div id="chartdiv"></div>
     {% endfor %}
     {% endif %}
     {% endwith %}
-    <div id="chartdiv"></div>
     
-    <script>
-        setTimeout(function(){
-            var xhr = new XMLHttpRequest();
-                xhr.open('GET', "api/run", true);
-                xhr.send(null);
-                xhr.onload = function () {
-                    var res = this.responseText;
-                    if(res == "running"){
-                        //alert(res);
-                        window.location.reload();
-                    }
-                };
-        }, 5000);
-    </script>
     
     
 </div>

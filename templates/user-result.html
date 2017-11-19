@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block body %}
+					<!-- Nav -->
+						<nav id="nav">
+							<ul>
+								<li><a href="/">首頁</a></li>
+                                <li>
+									<a href="#">訓練</a>
+									<ul>
+										<li><a href="/train-pic">照片上傳</a></li>
+										<li><a href="/train-cam">拍照上傳</a></li>
+									</ul>
+								</li>
+								<li><a href="/upload">影片上傳</a></li>
+								<li><a href="/analysis">影像分析</a></li>
+								<li class="current"><a href="/result">比對結果</a></li>
+                                <li><a href="/admin">檔案管理</a></li>
+							</ul>
+						</nav>
+				</div>
+<section class="wrapper style1">
+<div class="container">
+<div id="content">
+
+
+    {% with names = get_flashed_messages(category_filter=["names"]) %}
+    {% if names %}
+    {% for message in names %}
+    <label>{{ message }} 的辨識分析：</label>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    
+    
+    {% with image = get_flashed_messages(category_filter=["image"]) %}
+    {% if image %}
+    {% for message in image %}
+    <img width="30%" src="static/result/{{ message }}.jpg" />
+    <br>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    
+    
+</div>
+</div> 
+</section>    
+{% endblock %}

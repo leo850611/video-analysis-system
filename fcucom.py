@@ -97,46 +97,63 @@ def analysis():
         #建立進程池
         if os.path.isfile('ing') != True:
             open('ing', 'w').close()
+            open('videoname', 'w').write(videoname)
             multiprocessing.freeze_support() #避免RuntimeError(win)
             pool = multiprocessing.Pool()
             pool.apply_async(videotask, args=(videoname,peoplename,))
             #pool.close()
             #pool.join()
             return redirect(url_for('result'))
-            #return alertmsg('請等待比對結果!')
         else:
             return alertmsg('Error: 前次的辨識尚未完成')
     else:
         #產生影片檔及姓名選單
         videolist = os.listdir(app.config['UPLOAD_FOLDER'])
-        for i in videolist:
-            flash(i, 'videos')
+        for video in videolist:
+            flash(video, 'videos')
         namelist = os.listdir('training-images')
-        for i in namelist:
-            flash(i, 'names')
+        for name in namelist:
+            flash(name, 'names')
         return render_template('analysis.html')
 
 
 @app.route('/result' , methods = ['GET'])
 def result():
     if os.path.isfile('ing'):
-        flash('正在進行辨識', 'msg')
+        return render_template('wait.html')
     elif os.path.isfile('result.txt'):
         timetable()
         flash(time.time(), 'timejs')
+        namelist = os.listdir('training-images')
+        for name in namelist:
+            flash(name, 'names')
     else:
         flash('沒有任何結果', 'err')
     return render_template('result.html')
 
+    
 @app.route('/result/<username>' , methods = ['GET'])
 def user_result(username):
     namelist = os.listdir('training-images')
     if username in namelist:
-        #依人名回傳結果
-        return username
+        flash(username, 'names')
+        videoname = open('videoname', 'r').read()
+        videoname = videoname.split('.')[0]
+        
+        file = open('result.txt')
+        line = file.readline()
+        while line:
+            sec = line.split("'")
+            peoplename = sec[1]           
+            if(username == peoplename):
+                sec = sec[-1][1:].strip()
+                flash(videoname+'/'+sec, 'image')
+            line = file.readline()
+        file.close()
+        return render_template('user-result.html') 
     else:
         return render_template('404.html') 
-        
+    
 
 @app.route('/admin' , methods = ['GET', 'POST'])
 def admin():
@@ -158,8 +175,8 @@ def admin():
     else:
         namelist = os.listdir('training-images')
         #縮圖建立
-        for i in namelist:
-            name = i.strip()
+        for name in namelist:
+            name = name.strip()
             try:
                 files= os.listdir('training-images/'+ name )
                 shutil.copy2('training-images/'+ name +'/'+files[0], 'static/'+ name +'.png')
@@ -167,20 +184,18 @@ def admin():
                 return render_template('500.html'), 500
         #產生影片及姓名選取方塊
         videolist = os.listdir(app.config['UPLOAD_FOLDER'])
-        for i in videolist:
-            flash(i, 'videos')
-        for i in namelist:
-            flash(i, 'names')
-            piclist = os.listdir('training-images/'+ i)
-            flash(i + ' ( '+ str(len(piclist)) +'張照片)', 'people')         
+        for vide in videolist:
+            flash(vide, 'videos')
+        for name in namelist:
+            flash(name, 'names')
+            piclist = os.listdir('training-images/'+ name)
+            flash(name + ' ( '+ str(len(piclist)) +'張照片)', 'people')         
         return render_template('admin.html')
     
-
 
 @app.route('/admin/<username>' , methods = ['GET'])
 def admin_file(username):
     namelist = os.listdir('training-images')
-    #依人名回傳結果
     if username in namelist:
         flash(username, 'names')
         piclist = os.listdir('training-images/'+ username)
@@ -194,12 +209,6 @@ def admin_file(username):
     else:
         return render_template('404.html') 
 
-@app.route('/api/run', methods = ['GET'])
-def runcheck():
-    if os.path.isfile('ing'):
-        return ('running')
-    else:
-        return ('not running')
     
 @app.errorhandler(404)
 def page_not_found(e):
@@ -268,7 +277,7 @@ def videotask(videoname, peoplename):
         subprocess.call(['python', 'video.py', 'generated-embeddings/classifier.pkl','uploads/' + videoname])
     except:
         pass
-    finally:    
+    finally:
         removefile('ing')
     return 0
    
@@ -312,7 +321,6 @@ def timetable():
             file = open('result.txt')
             line = file.readline()
             while line:
-                min = 0
                 sec = line.split("'")
                 peoplename = sec[1]           
                 if(name == peoplename):

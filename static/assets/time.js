@@ -22,9 +22,55 @@ var chart = AmCharts.makeChart( "chartdiv", {
     "startField": "start",
     "endField": "end",
     "durationField": "duration",
-    "dataProvider": [  ],
+    "dataProvider": [ {
+        "category": "ff",
+        "segments": [ ]
+        },{
+        "category": "light",
+        "segments": [ {
+                        "start": 12
+,
+                        "duration": 1,
+                        "color": "#33CCFF"
+                    },{
+                        "start": 13
+,
+                        "duration": 1,
+                        "color": "#33CCFF"
+                    },{
+                        "start": 14
+,
+                        "duration": 1,
+                        "color": "#33CCFF"
+                    },{
+                        "start": 15
+,
+                        "duration": 1,
+                        "color": "#33CCFF"
+                    },{
+                        "start": 17
+,
+                        "duration": 1,
+                        "color": "#33CCFF"
+                    },{
+                        "start": 18
+,
+                        "duration": 1,
+                        "color": "#33CCFF"
+                    },{
+                        "start": 25
+,
+                        "duration": 1,
+                        "color": "#33CCFF"
+                    },{
+                        "start": 28
+,
+                        "duration": 1,
+                        "color": "#33CCFF"
+                    },]
+        }, ],
         "valueScrollbar": {
-            "autoGridCount":true
+            "autoGridCount":false
         },
         "chartCursor": {
             "cursorColor":"#55bb76",
