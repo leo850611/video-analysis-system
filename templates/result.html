@@ -42,7 +42,7 @@
     {% with names = get_flashed_messages(category_filter=["names"]) %}
     {% if names %}
     {% for message in names %}
-    <li style="margin-left:30px"><a href="result/{{ message }}">{{ message }}</a></li>
+    <li style="margin-left:30px"><a target="_blank" href="result/{{ message }}">{{ message }}</a></li>
     {% endfor %}
     {% endif %}
     {% endwith %}

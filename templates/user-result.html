@@ -35,7 +35,7 @@
     {% with image = get_flashed_messages(category_filter=["image"]) %}
     {% if image %}
     {% for message in image %}
-    <img width="30%" src="static/result/{{ message }}.jpg" />
+    <img width="30%" src="../static/result/{{ message }}.jpg" />
     <br>
     {% endfor %}
     {% endif %}

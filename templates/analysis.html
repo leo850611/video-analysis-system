@@ -38,7 +38,7 @@
         <br><br>
         <label>選擇要辨識的人：</label>
         <select size=1 name="peoplename" required="required"> 
-            <option value="" selected="selected">-</option>
+            <option value="" selected="selected">選擇一個名字</option>
             {% with names = get_flashed_messages(category_filter=["names"]) %}
             {% if names %}
             {% for message in names %}
@@ -48,7 +48,7 @@
             {% endwith %}
         </select>
         
-        <p><input type="submit" value="開始分析"><br/>
+        <p><p><input type="submit" value="開始分析"><br/>
     </form>
     
     

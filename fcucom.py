@@ -8,7 +8,7 @@ import hashlib
 import time
 
 UPLOAD_FOLDER = '/uploads'
-ALLOWED_EXTENSIONS_VID = set(['mp4', 'avi', 'mkv', 'wmv'])
+ALLOWED_EXTENSIONS_VID = set(['avi'])
 ALLOWED_EXTENSIONS_PIC = set(['jpg', 'jpge', 'png'])
 
 app = Flask(__name__)
@@ -122,6 +122,7 @@ def result():
     if os.path.isfile('ing'):
         return render_template('wait.html')
     elif os.path.isfile('result.txt'):
+        flash(getvideoname(), 'video')
         timetable()
         flash(time.time(), 'timejs')
         namelist = os.listdir('training-images')
@@ -136,10 +137,7 @@ def result():
 def user_result(username):
     namelist = os.listdir('training-images')
     if username in namelist:
-        flash(username, 'names')
-        videoname = open('videoname', 'r').read()
-        videoname = videoname.split('.')[0]
-        
+        flash(username, 'names')       
         file = open('result.txt')
         line = file.readline()
         while line:
@@ -147,7 +145,7 @@ def user_result(username):
             peoplename = sec[1]           
             if(username == peoplename):
                 sec = sec[-1][1:].strip()
-                flash(videoname+'/'+sec, 'image')
+                flash(getvideoname()+'/'+sec, 'image')
             line = file.readline()
         file.close()
         return render_template('user-result.html') 
@@ -356,7 +354,16 @@ def timetable():
     } );''')
     f.close()
 
-   
+def getvideoname():
+    try:
+        videoname = open('videoname', 'r').read()
+        videoname = videoname.split('.')[0]
+        return videoname
+    except:
+        return 'null'
+
+    
+    
 if __name__ == '__main__':
     app.debug = True
     app.secret_key = '6Le7Lx0UAA996OzccZzh6IKgBN9B4d5XCuK1uQXwJ' 
