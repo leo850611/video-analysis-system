@@ -10,7 +10,7 @@
     {% with names = get_flashed_messages(category_filter=["names"]) %}
     {% if names %}
     {% for message in names %}
-    <label>{{ message }} 的所有照片</label>
+    <h2>{{ message }} 的所有照片</h2>
     {% endfor %}
     {% endif %}
     {% endwith %}

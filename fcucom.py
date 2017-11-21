@@ -140,9 +140,8 @@ def user_result(username):
         file = open('result.txt')
         line = file.readline()
         while line:
-            sec = line.split("'")
-            peoplename = sec[1]           
-            if(username == peoplename):
+            sec = line.split("'")          
+            if(nameintext(username, line)):
                 sec = sec[-1][1:].strip()
                 flash(getvideoname()+'/'+sec, 'image')
                 totalsec = totalsec + 1
@@ -320,9 +319,8 @@ def timetable():
             file = open('result.txt')
             line = file.readline()
             while line:
-                sec = line.split("'")
-                peoplename = sec[1]           
-                if(name == peoplename):
+                sec = line.split("'")        
+                if(nameintext(name, line)):
                     sec = sec[-1][1:]
                     f.write('''{
                         "start": '''+ sec +''',
@@ -362,6 +360,14 @@ def getvideoname():
         return videoname
     except:
         return 'null'
+
+def nameintext(name, nametxt):
+    flag = False
+    namelist = nametxt.split("'")
+    for n in namelist:
+        if n == name:
+            flag = True
+    return flag
 
     
     
