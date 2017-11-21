@@ -40,6 +40,10 @@ def getRep(bgrframe):
 		landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE))
 	if alignedFaces is None:
 		raise Exception("Unable to align the frame")
+		
+	for b in boundingBox:
+		(x,y,w,h) = (b.left(), b.top(), b.right(), b.bottom())
+		cv2.rectangle(bgrframe, (x, y), (w, h), (0, 255, 0), 2)
  
 	reps = []
 	for alignedFace in alignedFaces:
