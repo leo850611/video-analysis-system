@@ -1,6 +1,6 @@
 # coding=utf-8
 import os
-from flask import Flask,url_for,request,render_template,redirect,escape,flash
+from flask import Flask, url_for, request, render_template, redirect, escape, flash
 from werkzeug import secure_filename
 import base64, string, random
 import shutil, subprocess, multiprocessing
@@ -74,11 +74,10 @@ def trainCam():
 def upload():
     if request.method == 'POST':
         file = request.files['file'] 
-        vodname = request.form['vod_date'] +'_'+ request.form['vod_time'].replace(':', '')
         file.filename = file.filename.lower()
         if file and allowed_file(file.filename , 'video'): 
             filename = secure_filename(file.filename)
-            filename = vodname + os.path.splitext(filename)[1]
+            filename = request.form['vod_date'] +'_' + filename
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return alertmsg('上傳成功!')
         else:
@@ -302,7 +301,7 @@ def timetable():
     "segmentsField": "segments",
     "colorField": "color",
     "startDate": "''')
-    f.write('2017-10-01')
+    f.write(getvideoname().split('_')[0])
     f.write('''",
     "startField": "start",
     "endField": "end",
