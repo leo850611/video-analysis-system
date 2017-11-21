@@ -26,17 +26,28 @@
     {% with names = get_flashed_messages(category_filter=["names"]) %}
     {% if names %}
     {% for message in names %}
-    <label>{{ message }} 的辨識分析：</label>
+    <label>{{ message }} 的辨識結果</label>
     {% endfor %}
     {% endif %}
     {% endwith %}
     
     
+    {% with detail = get_flashed_messages(category_filter=["detail"]) %}
+    {% if detail %}
+    {% for message in detail %}
+    <label>出現秒數： {{ message }}：</label>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    
+    
+    <label>出現時間列表：</label>
     {% with image = get_flashed_messages(category_filter=["image"]) %}
     {% if image %}
     {% for message in image %}
+    <p>第 {{ message.split("/")[-1] }} 秒</p>
     <img width="30%" src="../static/result/{{ message }}.jpg" />
-    <br>
+    <br><br>
     {% endfor %}
     {% endif %}
     {% endwith %}

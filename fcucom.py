@@ -91,16 +91,14 @@ def upload():
 def analysis():
     if request.method == 'POST':
         videoname = request.form['videoname']
-        peoplename = request.form['peoplename']
         videoname = secure_filename(videoname)
-        peoplename = secure_filename(peoplename)
         #建立進程池
         if os.path.isfile('ing') != True:
             open('ing', 'w').close()
             open('videoname', 'w').write(videoname)
             multiprocessing.freeze_support() #避免RuntimeError(win)
             pool = multiprocessing.Pool()
-            pool.apply_async(videotask, args=(videoname,peoplename,))
+            pool.apply_async(videotask, args=(videoname,))
             #pool.close()
             #pool.join()
             return redirect(url_for('result'))
@@ -138,6 +136,7 @@ def user_result(username):
     namelist = os.listdir('training-images')
     if username in namelist:
         flash(username, 'names')       
+        totalsec = 0
         file = open('result.txt')
         line = file.readline()
         while line:
@@ -146,8 +145,10 @@ def user_result(username):
             if(username == peoplename):
                 sec = sec[-1][1:].strip()
                 flash(getvideoname()+'/'+sec, 'image')
+                totalsec = totalsec + 1
             line = file.readline()
         file.close()
+        flash(totalsec, 'detail')
         return render_template('user-result.html') 
     else:
         return render_template('404.html') 
@@ -267,7 +268,7 @@ def facechange():
         f.close()
         return True
 
-def videotask(videoname, peoplename):
+def videotask(videoname):
     try:
         subprocess.call(['rm', 'result.txt'])
         if facechange():
