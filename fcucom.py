@@ -190,21 +190,29 @@ def admin():
         return render_template('admin.html')
     
 
-@app.route('/admin/<username>' , methods = ['GET'])
+@app.route('/admin/<username>' , methods = ['GET', 'POST'])
 def admin_file(username):
-    namelist = os.listdir('training-images')
-    if username in namelist:
-        flash(username, 'names')
-        piclist = os.listdir('training-images/'+ username)
-        for pic in piclist:
-            f = open('training-images/'+ username + '/' + pic,'rb')
-            picbase64 = base64.b64encode(f.read())
-            f.close()
-            picbase64 = (str(picbase64))[2:-1]
-            flash(picbase64, 'image')
-        return render_template('admin-file.html') 
+    if request.method == 'POST':
+        delpic = request.form['del']
+        try:
+            os.remove('training-images/' + username +'/'+ delpic)
+            return alertmsg('刪除成功!')
+        except:
+            return alertmsg('Error: 刪除失敗')
     else:
-        return render_template('404.html') 
+        namelist = os.listdir('training-images')
+        if username in namelist:
+            flash(username, 'names')
+            piclist = os.listdir('training-images/'+ username)
+            for pic in piclist:
+                f = open('training-images/'+ username + '/' + pic,'rb')
+                picbase64 = base64.b64encode(f.read())
+                f.close()
+                picbase64 = (str(picbase64))[2:-1]
+                flash(pic +'-'+ picbase64, 'image')
+            return render_template('admin-file.html') 
+        else:
+            return render_template('404.html') 
 
     
 @app.errorhandler(404)
@@ -233,7 +241,7 @@ def newfile(filename):
         os.mkdir(filename)
 
 def id_generator(chars=string.ascii_lowercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(6))
+    return ''.join(random.choice(chars) for _ in range(8))
 
 def removefile(filename):
     try:

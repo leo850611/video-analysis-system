@@ -19,8 +19,11 @@
     {% with image = get_flashed_messages(category_filter=["image"]) %}
     {% if image %}
     {% for message in image %}
-    <img src="data:image/png;base64,{{ message }}" />
-    <br>
+    <img width="300" src="data:image/png;base64,{{ message.split('-')[1] }}" />
+    <form action="#" method="post">
+        <button type="submit" name="del" value="{{ message.split('-')[0] }}" ><img width="10" height="10" src="{{ url_for('static', filename='images/del.png')}}" > 刪除</button>
+    </form>
+    <br><br>
     {% endfor %}
     {% endif %}
     {% endwith %}

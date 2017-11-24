@@ -40,16 +40,23 @@ def getRep(bgrframe):
 		landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE))
 	if alignedFaces is None:
 		raise Exception("Unable to align the frame")
-		
-	for b in boundingBox:
-		(x,y,w,h) = (b.left(), b.top(), b.right(), b.bottom())
-		cv2.rectangle(bgrframe, (x, y), (w, h), (0, 255, 0), 2)
- 
 	reps = []
 	for alignedFace in alignedFaces:
 		reps.append(net.forward(alignedFace))
     	# print (reps)
 	return reps
+def rectangle(bgrframe,persons):
+	rgbframe = cv2.cvtColor(bgrframe, cv2.COLOR_BGR2RGB)
+	i = 0
+	#align 產生的box
+	boundingBox = align.getAllFaceBoundingBoxes(rgbframe)
+	if len(boundingBox) == 0:
+		return
+	for b in boundingBox:
+		(x,y,w,h) = (b.left(), b.top(), b.right(), b.bottom())
+		cv2.rectangle(bgrframe, (x, y), (w, h), (0, 255, 0), 2)
+		cv2.putText(bgrframe, persons[i],(x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+		i += 1
 def infer(frame, args):
 	with open(args.classifierModel, 'r') as f:
 		if sys.version_info[0] < 3:
@@ -118,8 +125,7 @@ def getVideo():
 					persons[i] = "unknown"
 
                 	# Print the person name and conf value on the frame
-			cv2.putText(frame, "P: {}".format(persons),
-						(50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+			rectangle(frame, persons)
 			cv2.imwrite('static/result/' + str((args.Video.split("/")[1]).split(".avi")[0]) + '/' +str(times) + '.jpg',frame)
 			#cv2.imshow('', frame)
 			
