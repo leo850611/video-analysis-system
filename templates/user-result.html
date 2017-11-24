@@ -27,6 +27,7 @@
     {% if names %}
     {% for message in names %}
     <h2>{{ message }} 的辨識結果</h2>
+    <img width="294" height="221" src='../static/{{ message }}.png'/>
     {% endfor %}
     {% endif %}
     {% endwith %}
