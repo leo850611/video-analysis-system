@@ -196,7 +196,11 @@ def admin_file(username):
         delpic = request.form['del']
         try:
             os.remove('training-images/' + username +'/'+ delpic)
-            return alertmsg('刪除成功!')
+            if (len(os.listdir('training-images/' + username)) == 0):
+                shutil.rmtree('training-images/' + username)
+                return redirect(url_for('admin'))
+            else:
+                return alertmsg('刪除成功!')
         except:
             return alertmsg('Error: 刪除失敗')
     else:
