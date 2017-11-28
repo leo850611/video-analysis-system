@@ -42,6 +42,17 @@
     {% endwith %}
     
     
+    <label>連續的時間區段：</label>
+    {% with times = get_flashed_messages(category_filter=["times"]) %}
+    {% if times %}
+    {% for message in times %}
+    [<a href="#" onclick="window.open('/result/{{ message }}', 'js', config='height=560,width=880');">{{ message.split("/")[1] }}</a>] 
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <br>
+    
+    
     <label>出現時間列表：</label>
     {% with image = get_flashed_messages(category_filter=["image"]) %}
     {% if image %}

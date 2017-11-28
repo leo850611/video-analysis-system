@@ -10,8 +10,6 @@ import time
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS_VID = set(['avi'])
 ALLOWED_EXTENSIONS_PIC = set(['jpg', 'jpge', 'png'])
-PEOPLE_FOLDER = 'people-images'
-
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -30,6 +28,7 @@ def trainPic():
         if name != '':
             #照片上傳模式
             print('Get name file: '+ name)
+            name = secure_filename(name)
             peoplefile = 'people-images/'+ name
             newfile(peoplefile)
             try:
@@ -58,6 +57,7 @@ def trainCam():
             if hashlib.md5(picbase64.encode(encoding='UTF-8') ).hexdigest() != '75acd48bad3bbd6f4f5f9b90a4e91cf4':
                 print('Get a name: '+ name)
                 picbase64 = picbase64[22:].encode()
+                name = secure_filename(name)
                 peoplefile = 'people-images/'+ name
                 newfile(peoplefile)
                     
@@ -94,7 +94,6 @@ def analysis():
         videoname = request.form['videoname']
         videoname = secure_filename(videoname)
         namelist = request.form.getlist('people')
-        print(namelist)##todo
         if (len(namelist) >= 2):
             #建立進程池
             if os.path.isfile('ing') != True:
@@ -144,25 +143,48 @@ def user_result(username):
     if (username in namelist) or (username == 'unknown'):
         flash(username, 'names')       
         totalsec = 0
+        lastSec = 0
+        num = 0
         try:
             file = open('result.txt')
             line = file.readline()
-            while line:
-                sec = line.split("'")          
+            while line:        
                 if(nameintext(username, line)):
-                    sec = sec[-1][1:].strip()
+                    sec = line.split("]")[-1].strip()
                     flash(getvideoname() +'/'+ sec +'.jpg?'+ str(time.time()), 'image')
                     totalsec = totalsec + 1
+                #找連續時間區段
+                    num = num +1
+                    lastSec = int(sec)
+                else:
+                    if(num >= 4):
+                        flash(username +'/'+ str(lastSec - num +1) +'-'+ str(lastSec), 'times')
+                    lastSec = 0
+                    num = 0
                 line = file.readline()
+            if(num >= 4):
+                flash(username +'/'+ str(lastSec - num +1) +'-'+ str(lastSec), 'times')
             file.close()
         except:
-            pass
+            return render_template('500.html') 
         flash(totalsec, 'detail')
         return render_template('user-result.html') 
     else:
         return render_template('404.html') 
     
 
+@app.route('/result/<username>/<times>' , methods = ['GET'])
+def user_result_times(username, times):
+    try:
+        startSec = int(times.split('-')[0])
+        endSec = int(times.split('-')[1])
+        for sec in range(startSec, endSec +1):
+            flash(getvideoname() +'/'+ str(sec), 'times')   
+        return render_template('times.html') 
+    except:    
+        return render_template('500.html')
+
+    
 @app.route('/admin' , methods = ['GET', 'POST'])
 def admin():
     if request.method == 'POST':
