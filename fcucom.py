@@ -10,6 +10,8 @@ import time
 UPLOAD_FOLDER = '/uploads'
 ALLOWED_EXTENSIONS_VID = set(['avi'])
 ALLOWED_EXTENSIONS_PIC = set(['jpg', 'jpge', 'png'])
+PEOPLE_FOLDER = 'people-images'
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -28,7 +30,7 @@ def trainPic():
         if name != '':
             #照片上傳模式
             print('Get name file: '+ name)
-            peoplefile = 'training-images/'+ name
+            peoplefile = 'people-images/'+ name
             newfile(peoplefile)
             try:
                 filelist = request.files.getlist("file")
@@ -56,7 +58,7 @@ def trainCam():
             if hashlib.md5(picbase64.encode(encoding='UTF-8') ).hexdigest() != '75acd48bad3bbd6f4f5f9b90a4e91cf4':
                 print('Get a name: '+ name)
                 picbase64 = picbase64[22:].encode()
-                peoplefile = 'training-images/'+ name
+                peoplefile = 'people-images/'+ name
                 newfile(peoplefile)
                     
                 with open(peoplefile+'/'+id_generator()+".png", "wb") as fh:
@@ -91,24 +93,30 @@ def analysis():
     if request.method == 'POST':
         videoname = request.form['videoname']
         videoname = secure_filename(videoname)
-        #建立進程池
-        if os.path.isfile('ing') != True:
-            open('ing', 'w').close()
-            open('videoname', 'w').write(videoname)
-            multiprocessing.freeze_support() #避免RuntimeError(win)
-            pool = multiprocessing.Pool()
-            pool.apply_async(videotask, args=(videoname,))
-            #pool.close()
-            #pool.join()
-            return redirect(url_for('result'))
+        namelist = request.form.getlist('people')
+        print(namelist)##todo
+        if (len(namelist) >= 2):
+            #建立進程池
+            if os.path.isfile('ing') != True:
+                open('ing', 'w').close()
+                open('videoname', 'w').write(videoname)
+                creatTrainingImg(namelist)
+                multiprocessing.freeze_support() #避免RuntimeError(win)
+                pool = multiprocessing.Pool()
+                pool.apply_async(videotask, args=(videoname,))
+                #pool.close()
+                #pool.join()
+                return redirect(url_for('result'))
+            else:
+                return alertmsg('Error: 前次的辨識尚未完成')
         else:
-            return alertmsg('Error: 前次的辨識尚未完成')
+            return alertmsg('Error: 請選擇至少兩個名字')
     else:
         #產生影片檔及姓名選單
         videolist = os.listdir(app.config['UPLOAD_FOLDER'])
         for video in videolist:
             flash(video, 'videos')
-        namelist = os.listdir('training-images')
+        namelist = os.listdir('people-images')
         for name in namelist:
             flash(name, 'names')
         return render_template('analysis.html')
@@ -133,19 +141,22 @@ def result():
 @app.route('/result/<username>' , methods = ['GET'])
 def user_result(username):
     namelist = os.listdir('training-images')
-    if username in namelist:
+    if (username in namelist) or (username == 'unknown'):
         flash(username, 'names')       
         totalsec = 0
-        file = open('result.txt')
-        line = file.readline()
-        while line:
-            sec = line.split("'")          
-            if(nameintext(username, line)):
-                sec = sec[-1][1:].strip()
-                flash(getvideoname()+'/'+sec, 'image')
-                totalsec = totalsec + 1
+        try:
+            file = open('result.txt')
             line = file.readline()
-        file.close()
+            while line:
+                sec = line.split("'")          
+                if(nameintext(username, line)):
+                    sec = sec[-1][1:].strip()
+                    flash(getvideoname() +'/'+ sec +'.jpg?'+ str(time.time()), 'image')
+                    totalsec = totalsec + 1
+                line = file.readline()
+            file.close()
+        except:
+            pass
         flash(totalsec, 'detail')
         return render_template('user-result.html') 
     else:
@@ -164,19 +175,19 @@ def admin():
                 print('del video: ' + filename)
             for i in namelist:
                 filename = secure_filename(i)
-                shutil.rmtree('training-images/'+ filename)
+                shutil.rmtree('people-images/'+ filename)
                 print('del name: ' + filename)
             return alertmsg('刪除成功!')
         except:
             return alertmsg('Error: 刪除失敗')
     else:
-        namelist = os.listdir('training-images')
+        namelist = os.listdir('people-images')
         #縮圖建立
         for name in namelist:
             name = name.strip()
             try:
-                files= os.listdir('training-images/'+ name )
-                shutil.copy2('training-images/'+ name +'/'+files[0], 'static/'+ name +'.png')
+                files= os.listdir('people-images/'+ name )
+                shutil.copy2('people-images/'+ name +'/'+files[0], 'static/'+ name +'.png')
             except:
                 return render_template('500.html'), 500
         #產生影片及姓名選取方塊
@@ -185,7 +196,7 @@ def admin():
             flash(vide, 'videos')
         for name in namelist:
             flash(name, 'names')
-            piclist = os.listdir('training-images/'+ name)
+            piclist = os.listdir('people-images/'+ name)
             flash(name + ' ( '+ str(len(piclist)) +'張照片)', 'people')         
         return render_template('admin.html')
     
@@ -193,35 +204,38 @@ def admin():
 @app.route('/admin/<username>' , methods = ['GET', 'POST'])
 def admin_file(username):
     if request.method == 'POST':
-        delpic = request.form['del']
+        picname = request.form['del']
+        picname = secure_filename(picname)
         try:
-            os.remove('training-images/' + username +'/'+ delpic)
-            if (len(os.listdir('training-images/' + username)) == 0):
-                shutil.rmtree('training-images/' + username)
-                return redirect(url_for('admin'))
+            if(picname == 'all'):
+                shutil.rmtree('people-images/' + username)
             else:
-                return alertmsg('刪除成功!')
+                os.remove('people-images/' + username +'/'+ picname)
+                if (len(os.listdir('people-images/' + username)) == 0):
+                    shutil.rmtree('people-images/' + username)
+            return alertmsg('刪除成功!')
         except:
             return alertmsg('Error: 刪除失敗')
     else:
-        namelist = os.listdir('training-images')
+        namelist = os.listdir('people-images')
         if username in namelist:
             flash(username, 'names')
-            piclist = os.listdir('training-images/'+ username)
+            piclist = os.listdir('people-images/'+ username)
+            flash(len(piclist), 'number')    
             for pic in piclist:
-                f = open('training-images/'+ username + '/' + pic,'rb')
+                f = open('people-images/'+ username + '/' + pic,'rb')
                 picbase64 = base64.b64encode(f.read())
                 f.close()
                 picbase64 = (str(picbase64))[2:-1]
                 flash(pic +'-'+ picbase64, 'image')
             return render_template('admin-file.html') 
         else:
-            return render_template('404.html') 
+            return redirect(url_for('admin'))
 
     
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return render_template('404.html'), 200
 
 @app.errorhandler(500)
 def bad_request(e):
@@ -336,7 +350,7 @@ def timetable():
                     f.write('''{
                         "start": '''+ sec +''',
                         "duration": 1,
-                        "color": "#33CCFF"
+                        "color": "#0000FF"
                     },''')
                 
                 line = file.readline()
@@ -380,6 +394,10 @@ def nameintext(name, nametxt):
             flag = True
     return flag
 
+def creatTrainingImg(namelist):
+    shutil.rmtree('training-images/')
+    for name in namelist:
+        shutil.copytree( 'people-images/' + name, 'training-images/' + name)
     
     
 if __name__ == '__main__':
@@ -387,6 +405,8 @@ if __name__ == '__main__':
     app.secret_key = '6Le7Lx0UAA996OzccZzh6IKgBN9B4d5XCuK1uQXwJ' 
     newfile('uploads')
     newfile('training-images')
+    newfile('people-images')
+    
     removefile('ing')
     app.run(host = '0.0.0.0')
     

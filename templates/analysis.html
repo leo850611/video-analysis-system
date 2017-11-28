@@ -47,10 +47,27 @@
             {% endif %}
             {% endwith %}
         </select> -->
-        
+        <br><br>
+        <label>選擇要辨識的人：(至少兩個)</label>
+            <input type="checkbox" name="all" onclick="check_all(this,'people')" />全選/全不選<br>
+            {% with names = get_flashed_messages(category_filter=["names"]) %}
+            {% if names %}
+            {% for message in names %}
+            <input type="checkbox" value="{{ message }}" name="people"> {{ message }}<br>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            
         <p><p><input type="submit" value="開始分析"><br/>
     </form>
     
+    <script type="text/javascript">
+        function check_all(obj,cName)
+        {
+            var checkboxs = document.getElementsByName(cName);
+            for(var i=0;i<checkboxs.length;i++){checkboxs[i].checked = obj.checked;}
+        }
+    </script>
     
 </div>
 </div> 

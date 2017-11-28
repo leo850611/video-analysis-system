@@ -46,7 +46,7 @@
     {% with image = get_flashed_messages(category_filter=["image"]) %}
     {% if image %}
     {% for message in image %}
-    [<a href="#{{ message.split("/")[-1] }}">{{ message.split("/")[-1] }}</a>] 
+    [<a href="#{{ message.split("/")[-1].split("?")[0].split(".")[0] }}">{{ message.split("/")[-1].split("?")[0].split(".")[0] }}</a>] 
     {% endfor %}
     {% endif %}
     {% endwith %}
@@ -55,8 +55,8 @@
     {% with image = get_flashed_messages(category_filter=["image"]) %}
     {% if image %}
     {% for message in image %}
-    <br id="{{ message.split("/")[-1] }}">第 {{ message.split("/")[-1] }} 秒</br>
-    <img width="30%" src="../static/result/{{ message }}.jpg" />
+    <br id="{{ message.split("/")[-1].split("?")[0].split(".")[0] }}">第 {{ message.split("/")[-1].split("?")[0].split(".")[0] }} 秒</br>
+    <img width="30%" src="../static/result/{{ message }}" />
     <br>
     {% endfor %}
     {% endif %}

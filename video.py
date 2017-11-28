@@ -55,7 +55,7 @@ def rectangle(bgrframe,persons):
 	for b in boundingBox:
 		(x,y,w,h) = (b.left(), b.top(), b.right(), b.bottom())
 		cv2.rectangle(bgrframe, (x, y), (w, h), (0, 255, 0), 2)
-		cv2.putText(bgrframe, persons[i],(x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+		cv2.putText(bgrframe, persons[i],(x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 1.4, (0, 255, 0), 2)
 		i += 1
 def infer(frame, args):
 	with open(args.classifierModel, 'r') as f:
@@ -106,7 +106,7 @@ def getVideo():
 		ret, frame = video.read()
 		total += 1
 		if ret == True:
-			if total % fps != 0:
+			if total % 15 != 0:
 				continue
 	
 			persons, confidences = infer(frame, args)
@@ -119,7 +119,7 @@ def getVideo():
 				# We can simply ignore it.
 				times += 1
 				continue
-			print ("Person: " + str(persons) + " Confidence: " + str(confidences))
+			print ("Person: " + str(persons) + " Confidence: " + str(confidences)) + str(times)
 			for i, c in enumerate(confidences):
 				if c <= args.threshold:  # 0.5 is kept as threshold for known face.
 					persons[i] = "unknown"
@@ -172,7 +172,7 @@ if __name__ == '__main__':
 		default=0,
 		help='Capture device. 0 for latop webcam and 1 for usb webcam')
 	
-	parser.add_argument('--threshold', type=float, default=0.5)
+	parser.add_argument('--threshold', type=float, default=0.7)
 	parser.add_argument('--cuda', action='store_true')
 	parser.add_argument('--verbose', action='store_true')
 	parser.add_argument(

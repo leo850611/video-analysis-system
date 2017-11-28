@@ -38,7 +38,8 @@
     {% endif %}
     {% endwith %}
     
-    <label>個人詳細分析：</label>
+    <label>個人詳細分析：</label></li>
+    
     {% with names = get_flashed_messages(category_filter=["names"]) %}
     {% if names %}
     {% for message in names %}
@@ -46,7 +47,8 @@
     {% endfor %}
     {% endif %}
     {% endwith %}
-    
+
+    <li style="margin-left:30px"><a target="_blank" href="result/unknown">unknown</a> (未分類)</li>
     <br>
     <label>出現時間：</label>
     

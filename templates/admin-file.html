@@ -16,6 +16,17 @@
     {% endwith %}
     
     
+    {% with number = get_flashed_messages(category_filter=["number"]) %}
+    {% if number %}
+    {% for message in number %}
+    <form action="#" method="post">
+    <label>共有 {{ message }} 張照片 <button type="submit" name="del" value="all" ><img width="10" height="10" src="{{ url_for('static', filename='images/del.png')}}" > 全部刪除</button></label>
+    </form>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    
+    
     {% with image = get_flashed_messages(category_filter=["image"]) %}
     {% if image %}
     {% for message in image %}
