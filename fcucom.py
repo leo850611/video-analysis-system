@@ -54,7 +54,8 @@ def trainCam():
         if name != '':
             #拍照上傳模式
             picbase64 = request.form['pic']
-            if hashlib.md5(picbase64.encode(encoding='UTF-8') ).hexdigest() != '75acd48bad3bbd6f4f5f9b90a4e91cf4':
+            picMd5 = hashlib.md5(picbase64.encode(encoding='UTF-8') ).hexdigest()
+            if picMd5 != '75acd48bad3bbd6f4f5f9b90a4e91cf4' and picMd5 != 'cd7418bc956bcda7f9fcb88d8099c275':
                 print('Get a name: '+ name)
                 picbase64 = picbase64[22:].encode()
                 name = secure_filename(name)
@@ -94,22 +95,22 @@ def analysis():
         videoname = request.form['videoname']
         videoname = secure_filename(videoname)
         namelist = request.form.getlist('people')
-        if (len(namelist) >= 2):
-            #建立進程池
-            if os.path.isfile('ing') != True:
-                open('ing', 'w').close()
-                open('videoname', 'w').write(videoname)
-                creatTrainingImg(namelist)
-                multiprocessing.freeze_support() #避免RuntimeError(win)
-                pool = multiprocessing.Pool()
-                pool.apply_async(videotask, args=(videoname,))
-                #pool.close()
-                #pool.join()
-                return redirect(url_for('result'))
-            else:
-                return alertmsg('Error: 前次的辨識尚未完成')
+        #建立進程池
+        if os.path.isfile('ing') != True:
+            open('ing', 'w').close()
+            open('videoname', 'w').write(videoname)
+            if (len(namelist) == 1):
+                namelist.append('unknown')
+            creatTrainingImg(namelist)
+            multiprocessing.freeze_support() #避免RuntimeError(win)
+            pool = multiprocessing.Pool()
+            pool.apply_async(videotask, args=(videoname,))
+            #pool.close()
+            #pool.join()
+            return redirect(url_for('result'))
         else:
-            return alertmsg('Error: 請選擇至少兩個名字')
+            return alertmsg('Error: 前次的辨識尚未完成')
+       
     else:
         #產生影片檔及姓名選單
         videolist = os.listdir(app.config['UPLOAD_FOLDER'])
@@ -117,7 +118,8 @@ def analysis():
             flash(video, 'videos')
         namelist = os.listdir('people-images')
         for name in namelist:
-            flash(name, 'names')
+            if(name != 'unknown'):
+                flash(name, 'names')
         return render_template('analysis.html')
 
 
@@ -131,7 +133,8 @@ def result():
         flash(time.time(), 'timejs')
         namelist = os.listdir('training-images')
         for name in namelist:
-            flash(name, 'names')
+            if(name != 'unknown'):
+                flash(name, 'names')
     else:
         flash('沒有任何結果', 'err')
     return render_template('result.html')
@@ -217,9 +220,10 @@ def admin():
         for vide in videolist:
             flash(vide, 'videos')
         for name in namelist:
-            flash(name, 'names')
-            piclist = os.listdir('people-images/'+ name)
-            flash(name + ' ( '+ str(len(piclist)) +'張照片)', 'people')         
+            if(name != 'unknown'):
+                flash(name, 'names')
+                piclist = os.listdir('people-images/'+ name)
+                flash(name + ' ( '+ str(len(piclist)) +'張照片)', 'people')         
         return render_template('admin.html')
     
 
@@ -240,7 +244,7 @@ def admin_file(username):
             return alertmsg('Error: 刪除失敗')
     else:
         namelist = os.listdir('people-images')
-        if username in namelist:
+        if (username in namelist) and (username != 'unknown'):
             flash(username, 'names')
             piclist = os.listdir('people-images/'+ username)
             flash(len(piclist), 'number')    
@@ -358,27 +362,28 @@ def timetable():
     #圖表內容
     namelist = os.listdir('training-images')
     for name in namelist:
-        f.write('''{
-        "category": "'''+ name +'''",
-        "segments": [ ''')
-        
-        if os.path.isfile('result.txt'):
-            file = open('result.txt')
-            line = file.readline()
-            while line:
-                sec = line.split("'")        
-                if(nameintext(name, line)):
-                    sec = sec[-1][1:]
-                    f.write('''{
-                        "start": '''+ sec +''',
-                        "duration": 1,
-                        "color": "#0000FF"
-                    },''')
-                
+        if(name != 'unknown'):
+            f.write('''{
+            "category": "'''+ name +'''",
+            "segments": [ ''')
+            
+            if os.path.isfile('result.txt'):
+                file = open('result.txt')
                 line = file.readline()
-            file.close()
-        f.write(''']
-        },''')
+                while line:
+                    sec = line.split("'")        
+                    if(nameintext(name, line)):
+                        sec = sec[-1][1:]
+                        f.write('''{
+                            "start": '''+ sec +''',
+                            "duration": 1,
+                            "color": "#0000FF"
+                        },''')
+                    
+                    line = file.readline()
+                file.close()
+            f.write(''']
+            },''')
     
     f.write(''' ],
         "valueScrollbar": {
@@ -417,7 +422,10 @@ def nameintext(name, nametxt):
     return flag
 
 def creatTrainingImg(namelist):
-    shutil.rmtree('training-images/')
+    try:
+        shutil.rmtree('training-images/')
+    except:
+        pass
     for name in namelist:
         shutil.copytree( 'people-images/' + name, 'training-images/' + name)
     

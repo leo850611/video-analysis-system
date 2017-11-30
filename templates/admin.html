@@ -32,26 +32,24 @@
         {% endfor %}
         {% endif %}
         {% endwith %}	
-        <br>
-	
-    
+        <br>    
     <br>
     
     <form action="" method="post">   
-        <label>選擇要刪除的影片：</label>
-            {% with videos = get_flashed_messages(category_filter=["videos"]) %}
-            {% if videos %}
-            {% for message in videos %}
-            <input type="checkbox" value="{{ message }}" name="delvideo"> {{ message }}<br>
-            {% endfor %}
-            {% endif %}
-            {% endwith %}
-        <br>
         <label>選擇要刪除的名字：</label>
             {% with names = get_flashed_messages(category_filter=["names"]) %}
             {% if names %}
             {% for message in names %}
             <input type="checkbox" value="{{ message }}" name="delname"> {{ message }}<br>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        <br>
+        <label>選擇要刪除的影片：</label>
+            {% with videos = get_flashed_messages(category_filter=["videos"]) %}
+            {% if videos %}
+            {% for message in videos %}
+            <input type="checkbox" value="{{ message }}" name="delvideo"> {{ message }}<br>
             {% endfor %}
             {% endif %}
             {% endwith %}

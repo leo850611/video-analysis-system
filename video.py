@@ -96,17 +96,17 @@ def getVideo():
 	video = cv2.VideoCapture(args.Video)
 	fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
 	total = video.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT)
-	print (int(total/fps))
+	print (int(fps))
 	confidenceList = []
 	times = 1
 	total = 0
 	fp = open("result.txt", "a")
 	#cv2.imwrite('output/'+str(s) + '.jpg',frame)
-	while True:
+	while video.isOpened():
 		ret, frame = video.read()
 		total += 1
 		if ret == True:
-			if total % 15 != 0:
+			if total % 25 != 0:
 				continue
 	
 			persons, confidences = infer(frame, args)
@@ -172,7 +172,7 @@ if __name__ == '__main__':
 		default=0,
 		help='Capture device. 0 for latop webcam and 1 for usb webcam')
 	
-	parser.add_argument('--threshold', type=float, default=0.7)
+	parser.add_argument('--threshold', type=float, default=0.85)
 	parser.add_argument('--cuda', action='store_true')
 	parser.add_argument('--verbose', action='store_true')
 	parser.add_argument(

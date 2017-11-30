@@ -48,7 +48,7 @@
             {% endwith %}
         </select> -->
         <br><br>
-        <label>選擇要辨識的人：(至少兩個)</label>
+        <label>選擇要辨識的人：</label>
             <input type="checkbox" name="all" onclick="check_all(this,'people')" />全選/全不選<br>
             {% with names = get_flashed_messages(category_filter=["names"]) %}
             {% if names %}
