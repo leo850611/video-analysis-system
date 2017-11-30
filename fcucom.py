@@ -212,12 +212,13 @@ def admin():
         namelist = os.listdir('people-images')
         #縮圖建立
         for name in namelist:
-            name = name.strip()
-            try:
-                files= os.listdir('people-images/'+ name )
-                shutil.copy2('people-images/'+ name +'/'+files[0], 'static/'+ name +'.png')
-            except:
-                return render_template('500.html'), 500
+            if(name != 'unknown'):
+                name = name.strip()
+                try:
+                    files= os.listdir('people-images/'+ name )
+                    shutil.copy2('people-images/'+ name +'/'+files[0], 'static/'+ name +'.png')
+                except:
+                    return render_template('500.html'), 500
         #產生影片及姓名選取方塊
         videolist = os.listdir(app.config['UPLOAD_FOLDER'])
         for vide in videolist:
