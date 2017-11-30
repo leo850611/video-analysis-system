@@ -96,20 +96,23 @@ def analysis():
         videoname = secure_filename(videoname)
         namelist = request.form.getlist('people')
         #建立進程池
-        if os.path.isfile('ing') != True:
-            open('ing', 'w').close()
-            open('videoname', 'w').write(videoname)
-            if (len(namelist) == 1):
-                namelist.append('unknown')
-            creatTrainingImg(namelist)
-            multiprocessing.freeze_support() #避免RuntimeError(win)
-            pool = multiprocessing.Pool()
-            pool.apply_async(videotask, args=(videoname,))
-            #pool.close()
-            #pool.join()
-            return redirect(url_for('result'))
+        if (len(namelist) != 0):
+            if os.path.isfile('ing') != True:
+                open('ing', 'w').close()
+                open('videoname', 'w').write(videoname)
+                if (len(namelist) == 1):
+                    namelist.append('unknown')
+                creatTrainingImg(namelist)
+                multiprocessing.freeze_support() #避免RuntimeError(win)
+                pool = multiprocessing.Pool()
+                pool.apply_async(videotask, args=(videoname,))
+                #pool.close()
+                #pool.join()
+                return redirect(url_for('result'))
+            else:
+                return alertmsg('Error: 前次的辨識尚未完成')
         else:
-            return alertmsg('Error: 前次的辨識尚未完成')
+            return alertmsg('Error: 請至少選擇一個名字')
        
     else:
         #產生影片檔及姓名選單
